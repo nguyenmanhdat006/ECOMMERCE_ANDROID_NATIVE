@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Ecommerce</string>
+    <string name="title_products">Sản phẩm</string>
+    <string name="retry">Thử lại</string>
+</resources>
