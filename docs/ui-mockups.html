@@ -1,0 +1,436 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mô phỏng giao diện app Android</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{--bg:#f7f6f2;--card:#ffffff;--card2:#f1efe8;--tx:#1f1e1b;--tx2:#5f5e5a;--tx3:#888780;--bd:#e3e1d8;--bd2:#c9c7bd;
+--ac:#185fa5;--acbg:#e6f1fb;--acbd:#85b7eb;--rd:#a32d2d;--rdbg:#fcebeb;--rdbd:#f09595;--gn:#3b6d11;--gnbg:#eaf3de;--am:#854f0b;--ambg:#faeeda}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1b19;--card:#262624;--card2:#30302d;--tx:#ecebe5;--tx2:#b4b2a9;--tx3:#888780;--bd:#3a3a37;--bd2:#55544f;
+--ac:#b5d4f4;--acbg:#0c447c;--acbd:#378add;--rd:#f7c1c1;--rdbg:#501313;--rdbd:#a32d2d;--gn:#c0dd97;--gnbg:#27500a;--am:#fac775;--ambg:#412402}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.55}
+.page{max-width:1080px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;font-weight:600;margin:0 0 6px}h2{font-size:20px;font-weight:600;margin:0}
+h3{font-size:15px;font-weight:600;margin:28px 0 8px}
+p{margin:6px 0}code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:13px}
+.muted{color:var(--tx2)}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 8px}
+nav.toc a{font-size:13px;color:var(--ac);text-decoration:none;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:3px 9px}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px 16px;font-size:13px}
+.legend div{border-bottom:1px solid var(--bd);padding:3px 0}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:0 6px;border-radius:5px;background:var(--card2);border:1px solid var(--bd2);color:var(--tx2);margin:0 3px 2px 0}
+section.scr{margin-top:44px;padding-top:12px;border-top:2px solid var(--bd2)}
+.sh{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:4px}
+.grp{font-size:12px;color:var(--ac);background:var(--acbg);border-radius:5px;padding:1px 8px}
+.meta{font-size:13px;color:var(--tx2);margin:2px 0}
+.wrap{display:grid;grid-template-columns:minmax(0,310px) minmax(0,1fr);gap:24px;align-items:start;margin-top:14px}
+.phone{background:var(--card2);border-radius:14px;padding:14px}
+.screen{background:var(--card);border:1px solid var(--bd2);border-radius:28px;padding:38px 16px 18px;position:relative}
+.screen:before{content:"";position:absolute;top:13px;left:50%;transform:translateX(-50%);width:64px;height:5px;border-radius:3px;background:var(--bd2)}
+.blk{position:relative;border:1px dashed var(--bd2);border-radius:8px;padding:9px 10px;margin:0 0 12px;font-size:13px;color:var(--tx2)}
+.blk.over{border-style:solid;border-color:var(--acbd);background:var(--acbg)}
+.blk.err{border-color:var(--rdbd)}
+.n{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:50%;background:var(--acbg);color:var(--ac);border:1px solid var(--acbd);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;z-index:2}
+.blk.err .n{background:var(--rdbg);color:var(--rd);border-color:var(--rdbd)}
+.row{display:flex;align-items:center;gap:8px}.sp{justify-content:space-between}.col{display:flex;flex-direction:column;gap:6px}
+.t1{color:var(--tx);font-weight:600}.sm{font-size:12px}.c{text-align:center}
+.fld{display:flex;align-items:center;justify-content:space-between;height:36px;border:1px solid var(--bd2);border-radius:8px;padding:0 10px;font-size:13px;color:var(--tx3);margin-top:4px}
+.lbl{font-size:12px;color:var(--tx2)}
+.btn{height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;background:var(--acbg);color:var(--ac);border:1px solid var(--acbd)}
+.btn.g{background:transparent;color:var(--tx);border-color:var(--bd2)}.btn.d{background:var(--rdbg);color:var(--rd);border-color:var(--rdbd)}
+.errt{color:var(--rd);font-size:12px}
+.img{background:var(--card2);border:1px solid var(--bd);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx3);flex:none}
+.chip{display:inline-block;font-size:12px;padding:2px 10px;border-radius:14px;border:1px solid var(--bd2);color:var(--tx2);white-space:nowrap}
+.chip.on{background:var(--acbg);color:var(--ac);border-color:var(--acbd);font-weight:600}
+.chip.dis{opacity:.45;text-decoration:line-through}
+.st{font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px}
+.st.a{background:var(--ambg);color:var(--am)}.st.b{background:var(--acbg);color:var(--ac)}.st.g{background:var(--gnbg);color:var(--gn)}.st.r{background:var(--rdbg);color:var(--rd)}.st.n{background:var(--card2);color:var(--tx2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pc{border:1px solid var(--bd);border-radius:8px;padding:6px}
+.price{color:var(--rd);font-weight:600}
+.hs{display:flex;gap:6px;overflow:hidden}
+.otp{display:flex;gap:6px;justify-content:center}.otp div{width:34px;height:40px;border:1px solid var(--bd2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--tx3)}
+.tb{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--tx);font-size:15px}.tb .r{margin-left:auto;font-weight:400}
+.hr{border-top:1px solid var(--bd);margin:6px 0}
+.navb{display:flex;justify-content:space-around;font-size:11px;text-align:center}
+.navb div{display:flex;flex-direction:column;align-items:center}.navb i{font-size:20px}.navb .on{color:var(--ac);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{text-align:left;font-weight:600;color:var(--tx2);padding:6px 8px;border-bottom:1px solid var(--bd2)}
+td{padding:8px;border-bottom:1px solid var(--bd);vertical-align:top}
+.note{margin-top:12px;padding:8px 12px;border-left:3px solid var(--am);background:var(--ambg);color:var(--am);font-size:13px;border-radius:0 6px 6px 0}
+.note b{color:var(--am)}
+@media(max-width:700px){.wrap{grid-template-columns:minmax(0,1fr)}}
+@media print{.wrap{grid-template-columns:310px 1fr}section.scr{break-inside:avoid}}
+</style></head><body><div class="page">
+<h1>Mô phỏng giao diện app Android</h1>
+<p class="muted">20 màn hình của app khách hàng (chỉ thanh toán COD). Mỗi màn gồm hình mô phỏng chia khối và bảng chú thích. Số trong vòng tròn khớp với số ở bảng.</p>
+<nav class="toc"><a href="#login">1. Đăng nhập</a><a href="#register">2. Đăng ký</a><a href="#verify">3. Xác thực tài khoản</a><a href="#home">4. Trang chủ</a><a href="#category">5. Danh sách danh mục</a><a href="#search">6. Tìm kiếm và lọc</a><a href="#detail">7. Chi tiết sản phẩm</a><a href="#variant">8. Chọn biến thể (bottom sheet)</a><a href="#reviews">9. Danh sách đánh giá</a><a href="#cart">10. Giỏ hàng</a><a href="#checkout">11. Thanh toán (COD)</a><a href="#addrlist">12. Danh sách địa chỉ</a><a href="#addrform">13. Thêm hoặc sửa địa chỉ</a><a href="#result">14. Kết quả đặt hàng</a><a href="#orders">15. Danh sách đơn hàng</a><a href="#orderdetail">16. Chi tiết đơn hàng</a><a href="#unreviewed">17. Đơn chưa đánh giá</a><a href="#review">18. Viết hoặc sửa đánh giá</a><a href="#account">19. Tài khoản</a><a href="#settings">20. Cài đặt</a></nav>
+<h3>Component dùng chung</h3><div class="legend"><div><span class="tag">C1</span> Theme, màu, font, style chung</div><div><span class="tag">C2</span> Header chuẩn (back, tiêu đề, nút phụ)</div><div><span class="tag">C3</span> Header tìm kiếm (ô tìm + icon giỏ)</div><div><span class="tag">C4</span> Thanh điều hướng dưới + khung Activity</div><div><span class="tag">C5</span> Trạng thái loading, rỗng, lỗi + thử lại</div><div><span class="tag">C6</span> Nút bấm, ô nhập có báo lỗi</div><div><span class="tag">C7</span> Thẻ sản phẩm (ô lưới)</div><div><span class="tag">C8</span> Dòng sản phẩm (ảnh, tên, phân loại, giá)</div><div><span class="tag">C9</span> Bộ chỉnh số lượng</div><div><span class="tag">C10</span> Thanh hành động cố định dưới</div><div><span class="tag">C11</span> Thẻ địa chỉ</div><div><span class="tag">C12</span> Dòng đánh giá + thanh sao</div><div><span class="tag">C13</span> Nhãn trạng thái đơn hàng</div><div><span class="tag">C14</span> Dialog xác nhận</div></div>
+<h3>Quy ước chung</h3><p class="muted">Khung nét đứt là một khối giao diện. Khối nền xanh là lớp phủ (bottom sheet, dialog). Khối viền đỏ là trạng thái lỗi hoặc thất bại. Chưa đăng nhập vẫn xem được Trang chủ, Danh mục, Tìm kiếm, Chi tiết sản phẩm; các tab Giỏ hàng, Đơn hàng, Tài khoản yêu cầu đăng nhập. Dữ liệu trong hình chỉ là ví dụ.</p>
+<section class="scr" id="login"><div class="sh"><h2>1. Đăng nhập</h2><span class="grp">Auth</span></div>
+<div class="meta"><b>API:</b> <code>POST /api/auth/login</code></div><div class="meta"><b>Điều hướng:</b> Thành công → Trang chủ. Link → Đăng ký.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="c"><i class="ti ti-shopping-bag" style="font-size:30px" aria-hidden="true"></i><div class="t1">Ecommerce</div></div></div>
+<div class="blk"><span class="n">2</span><div class="t1" style="font-size:18px">Đăng nhập</div><div class="sm">Chào mừng bạn quay lại</div></div>
+<div class="blk"><span class="n">3</span><div class="lbl">Email</div><div class="fld"><span>name@company.com</span><i class="ti ti-mail" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">4</span><div class="lbl">Mật khẩu</div><div class="fld"><span>••••••••</span><i class="ti ti-eye" aria-hidden="true"></i></div></div>
+<div class="blk err"><span class="n">5</span><div class="errt">Email hoặc mật khẩu không đúng.</div></div>
+<div class="blk"><span class="n">6</span><div class="btn ">Đăng nhập</div></div>
+<div class="blk"><span class="n">7</span><div class="c">Chưa có tài khoản? <b style="color:var(--ac)">Đăng ký</b></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Logo, tên app</td><td><span class="tag">C1</span></td><td>Tĩnh, căn giữa trên cùng.</td></tr>
+<tr><td>2</td><td>Tiêu đề</td><td><span class="tag">C1</span></td><td>Tĩnh.</td></tr>
+<tr><td>3</td><td>Ô nhập email</td><td><span class="tag">C6</span></td><td>Bàn phím email. Kiểm tra có ký tự <code>@</code> trước khi gọi API.</td></tr>
+<tr><td>4</td><td>Ô nhập mật khẩu</td><td><span class="tag">C6</span></td><td>Ẩn ký tự, icon mắt để hiện hoặc ẩn. Bắt buộc nhập.</td></tr>
+<tr><td>5</td><td>Dòng lỗi</td><td><span class="tag">C6</span></td><td>Chỉ hiện khi API trả 401 hoặc mất mạng. API dùng một thông báo chung cho sai mật khẩu, không có tài khoản và chưa kích hoạt.</td></tr>
+<tr><td>6</td><td>Nút Đăng nhập</td><td><span class="tag">C6</span></td><td>Gọi API. Đang gọi: spinner, khóa nút. Thành công: lưu token, về Trang chủ.</td></tr>
+<tr><td>7</td><td>Liên kết Đăng ký</td><td><span class="tag">C1</span></td><td>Chuyển sang màn Đăng ký.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="register"><div class="sh"><h2>2. Đăng ký</h2><span class="grp">Auth</span></div>
+<div class="meta"><b>API:</b> <code>POST /api/auth/register</code></div><div class="meta"><b>Điều hướng:</b> Thành công → Xác thực (truyền email). Link → Đăng nhập.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Tạo tài khoản</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row"><div style="flex:1"><div class="lbl">Họ</div><div class="fld"><span>Nguyen</span></div></div><div style="flex:1"><div class="lbl">Tên</div><div class="fld"><span>Lan</span></div></div></div></div>
+<div class="blk"><span class="n">3</span><div class="lbl">Email</div><div class="fld"><span>name@company.com</span><i class="ti ti-mail" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">4</span><div class="lbl">Số điện thoại (không bắt buộc)</div><div class="fld"><span>09xx xxx xxx</span><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">5</span><div class="lbl">Mật khẩu</div><div class="fld"><span>Tối thiểu 6 ký tự</span><i class="ti ti-eye" aria-hidden="true"></i></div></div>
+<div class="blk err"><span class="n">6</span><div class="errt">Email này đã được đăng ký.</div></div>
+<div class="blk"><span class="n">7</span><div class="btn ">Đăng ký</div></div>
+<div class="blk"><span class="n">8</span><div class="c">Đã có tài khoản? <b style="color:var(--ac)">Đăng nhập</b></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back về Đăng nhập.</td></tr>
+<tr><td>2</td><td>Họ và tên</td><td><span class="tag">C6</span></td><td>Hai ô cùng hàng, không bắt buộc.</td></tr>
+<tr><td>3</td><td>Email</td><td><span class="tag">C6</span></td><td>Bắt buộc, phải chứa <code>@</code>.</td></tr>
+<tr><td>4</td><td>Số điện thoại</td><td><span class="tag">C6</span></td><td>Không bắt buộc, bàn phím số.</td></tr>
+<tr><td>5</td><td>Mật khẩu</td><td><span class="tag">C6</span></td><td>Bắt buộc, tối thiểu 6 ký tự, có icon hiện hoặc ẩn.</td></tr>
+<tr><td>6</td><td>Dòng lỗi</td><td><span class="tag">C6</span></td><td>Hiện khi API trả 400 (email trùng, email sai định dạng, mật khẩu ngắn). Hiển thị nguyên văn thông báo của máy chủ hoặc bản dịch tương ứng.</td></tr>
+<tr><td>7</td><td>Nút Đăng ký</td><td><span class="tag">C6</span></td><td>Gọi API, thành công thì chuyển sang màn Xác thực.</td></tr>
+<tr><td>8</td><td>Liên kết Đăng nhập</td><td><span class="tag">C1</span></td><td>Quay về Đăng nhập.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="verify"><div class="sh"><h2>3. Xác thực tài khoản</h2><span class="grp">Auth</span></div>
+<div class="meta"><b>API:</b> <code>POST /api/auth/verify</code></div><div class="meta"><b>Điều hướng:</b> Thành công → Đăng nhập (kèm thông báo "Đã kích hoạt").</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Xác thực email</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="c"><i class="ti ti-mail-check" style="font-size:34px" aria-hidden="true"></i><div class="sm">Nhập mã 6 số đã gửi tới<br><b>lan@example.com</b></div></div></div>
+<div class="blk"><span class="n">3</span><div class="otp"><div>4</div><div>8</div><div>3</div><div>9</div><div>2</div><div>0</div></div></div>
+<div class="blk err"><span class="n">4</span><div class="errt">Mã không đúng. Kiểm tra lại và thử lần nữa.</div></div>
+<div class="blk"><span class="n">5</span><div class="btn ">Xác nhận</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back về Đăng ký.</td></tr>
+<tr><td>2</td><td>Hướng dẫn</td><td><span class="tag">C1</span></td><td>Hiển thị email vừa đăng ký.</td></tr>
+<tr><td>3</td><td>Ô nhập mã 6 số</td><td><span class="tag">C6</span></td><td>Tự chuyển ô khi nhập, hỗ trợ dán cả mã. Bàn phím số.</td></tr>
+<tr><td>4</td><td>Dòng lỗi</td><td><span class="tag">C6</span></td><td>Hiện khi API trả 400.</td></tr>
+<tr><td>5</td><td>Nút Xác nhận</td><td><span class="tag">C6</span></td><td>Bật khi đủ 6 số. Gọi API, thành công thì về Đăng nhập.</td></tr>
+</table>
+<div class="note"><b>Lưu ý:</b> Backend chưa có API gửi lại mã xác thực. Giai đoạn đầu không vẽ nút "Gửi lại mã"; nếu cần thì bổ sung API ở backend trước.</div>
+</div></div></section>
+<section class="scr" id="home"><div class="sh"><h2>4. Trang chủ</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/category, GET /api/products, GET /api/products/search?isNewArrival=true</code></div><div class="meta"><b>Điều hướng:</b> Ô tìm → Tìm kiếm. Icon giỏ → Giỏ hàng. Thẻ sản phẩm → Chi tiết. Chip danh mục → Tìm kiếm đã lọc.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="row"><div class="fld" style="flex:1;margin:0"><span>Tìm sản phẩm</span><i class="ti ti-search" aria-hidden="true"></i></div><i class="ti ti-shopping-cart" style="font-size:22px" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">2</span><span class="chip on">Tất cả</span> <span class="chip">Áo</span> <span class="chip">Quần</span> <span class="chip">Giày</span> <span class="chip">Phụ kiện</span> </div>
+<div class="blk"><span class="n">3</span><div class="t1" style="margin-bottom:4px">Hàng mới</div><div class="hs"><div style="width:90px"><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo thun</div><div class="sm price">259.000 ₫</div></div></div><div style="width:90px"><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Quần jean</div><div class="sm price">399.000 ₫</div></div></div><div style="width:90px"><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Giày</div><div class="sm price">650.000 ₫</div></div></div></div></div>
+<div class="blk"><span class="n">4</span><div class="t1" style="margin-bottom:4px">Gợi ý hôm nay</div><div class="grid2"><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo sơ mi</div><div class="sm price">299.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo khoác</div><div class="sm price">459.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Quần short</div><div class="sm price">199.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Mũ lưỡi trai</div><div class="sm price">99.000 ₫</div></div></div></div>
+<div class="blk"><span class="n">5</span><div class="navb"><div class="on"><i class="ti ti-home" aria-hidden="true"></i><span>Trang chủ</span></div><div class=""><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Giỏ hàng</span></div><div class=""><i class="ti ti-receipt" aria-hidden="true"></i><span>Đơn hàng</span></div><div class=""><i class="ti ti-user" aria-hidden="true"></i><span>Tài khoản</span></div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header tìm kiếm</td><td><span class="tag">C3</span></td><td>Ô tìm là nút bấm mở màn Tìm kiếm. Icon giỏ có chấm số lượng, bấm mở Giỏ hàng. Chưa đăng nhập thì bấm giỏ sẽ yêu cầu đăng nhập.</td></tr>
+<tr><td>2</td><td>Chip danh mục</td><td>–</td><td>Cuộn ngang. Lấy từ danh sách danh mục. Bấm một chip mở Tìm kiếm với <code>categoryId</code>.</td></tr>
+<tr><td>3</td><td>Hàng mới</td><td><span class="tag">C7</span></td><td>Danh sách cuộn ngang, lọc <code>isNewArrival=true</code>. Ẩn nếu rỗng.</td></tr>
+<tr><td>4</td><td>Lưới sản phẩm</td><td><span class="tag">C7</span><span class="tag">C5</span></td><td>Lưới 2 cột, cuộn dọc, tải thêm khi tới cuối (phân trang). Có loading, rỗng, lỗi + thử lại.</td></tr>
+<tr><td>5</td><td>Thanh điều hướng dưới</td><td><span class="tag">C4</span></td><td>Tab Trang chủ đang chọn.</td></tr>
+</table>
+<div class="note"><b>Lưu ý:</b> Backend không có API banner hay khuyến mãi, nên không vẽ banner.</div>
+</div></div></section>
+<section class="scr" id="category"><div class="sh"><h2>5. Danh sách danh mục</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/category-types, GET /api/category</code></div><div class="meta"><b>Điều hướng:</b> Bấm một danh mục → Tìm kiếm đã lọc theo <code>categoryId</code>.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Danh mục</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="t1" style="margin-bottom:6px">Thời trang nam</div><div class="grid2"><div class="pc row"><div class="img" style="width:32px;height:32px"><i class="ti ti-category" style="font-size:18px" aria-hidden="true"></i></div><span class="sm t1">Áo</span></div><div class="pc row"><div class="img" style="width:32px;height:32px"><i class="ti ti-category" style="font-size:18px" aria-hidden="true"></i></div><span class="sm t1">Quần</span></div></div></div>
+<div class="blk"><span class="n">3</span><div class="t1" style="margin-bottom:6px">Phụ kiện</div><div class="grid2"><div class="pc row"><div class="img" style="width:32px;height:32px"><i class="ti ti-category" style="font-size:18px" aria-hidden="true"></i></div><span class="sm t1">Giày</span></div><div class="pc row"><div class="img" style="width:32px;height:32px"><i class="ti ti-category" style="font-size:18px" aria-hidden="true"></i></div><span class="sm t1">Túi</span></div></div></div>
+<div class="blk"><span class="n">4</span><div class="c sm">Đang tải / Không có danh mục / Lỗi + Thử lại</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back.</td></tr>
+<tr><td>2</td><td>Nhóm danh mục</td><td>–</td><td>Mỗi loại danh mục (category-type) là một tiêu đề; dưới là lưới 2 cột các danh mục thuộc loại đó.</td></tr>
+<tr><td>3</td><td>Nhóm danh mục (tiếp)</td><td>–</td><td>Lặp lại theo số loại danh mục.</td></tr>
+<tr><td>4</td><td>Trạng thái</td><td><span class="tag">C5</span></td><td>Dùng khối trạng thái chung.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="search"><div class="sh"><h2>6. Tìm kiếm và lọc</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/products/search</code></div><div class="meta"><b>Điều hướng:</b> Thẻ sản phẩm → Chi tiết.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="row"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><div class="fld" style="flex:1;margin:0"><span>áo thun</span><i class="ti ti-x" aria-hidden="true"></i></div><i class="ti ti-shopping-cart" style="font-size:22px" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><span class="chip">Sắp xếp: Tên A–Z ▾</span><span class="chip on"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Lọc (2)</span></div></div>
+<div class="blk"><span class="n">3</span><div class="sm" style="margin-bottom:6px">24 kết quả</div><div class="grid2"><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo thun basic</div><div class="sm price">259.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo thun polo</div><div class="sm price">329.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo thun oversize</div><div class="sm price">289.000 ₫</div></div><div class="pc"><div class="img" style="width:100%;height:64px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div class="sm t1" style="margin-top:4px">Áo thun trơn</div><div class="sm price">149.000 ₫</div></div></div></div>
+<div class="blk"><span class="n">4</span><div class="c"><i class="ti ti-search-off" style="font-size:28px" aria-hidden="true"></i><div class="sm">Không tìm thấy "xyz". Thử từ khóa khác hoặc bỏ bớt bộ lọc.</div></div></div>
+<div class="blk over"><span class="n">5</span><div class="t1">Lọc sản phẩm</div><div class="lbl">Khoảng giá</div><div class="fld"><span>0 ₫  –  1.000.000 ₫</span></div><div class="lbl">Thương hiệu</div><div class="fld"><span>Tất cả ▾</span></div><div class="lbl">Đánh giá từ</div><div class="fld"><span>★ 4 trở lên ▾</span></div><div class="row sp" style="margin-top:6px"><span>Chỉ hàng mới</span><span class="chip on">Bật</span></div><div class="row" style="margin-top:8px"><div class="btn g" style="flex:1">Xóa lọc</div><div class="btn" style="flex:1">Áp dụng</div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header tìm kiếm</td><td><span class="tag">C3</span></td><td>Ô nhập thật, tự mở bàn phím. Tìm khi bấm Enter hoặc sau 400 ms ngừng gõ. Không phân biệt hoa thường và dấu tiếng Việt.</td></tr>
+<tr><td>2</td><td>Thanh sắp xếp và lọc</td><td>–</td><td>Chip sắp xếp mở menu nhỏ (tên, giá, đánh giá, tăng hoặc giảm). Nút Lọc mở bottom sheet bên dưới, số trong ngoặc là số bộ lọc đang bật.</td></tr>
+<tr><td>3</td><td>Kết quả</td><td><span class="tag">C7</span></td><td>Lưới 2 cột. Cuộn tới cuối thì tải trang kế (<code>page</code>, <code>size</code>); hiện vòng quay ở cuối khi <code>hasNext</code>.</td></tr>
+<tr><td>4</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Hiện thay cho lưới khi không có kết quả.</td></tr>
+<tr><td>5</td><td>Bottom sheet lọc</td><td><span class="tag">C6</span></td><td>Tương ứng <code>minPrice, maxPrice, brand, minRating, isNewArrival</code>. Áp dụng thì đóng sheet và tải lại từ trang 0.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="detail"><div class="sh"><h2>7. Chi tiết sản phẩm</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/products/{id}, GET /api/reviews/product/{id}, POST /api/carts</code></div><div class="meta"><b>Điều hướng:</b> "Chọn phân loại" hoặc Thêm vào giỏ → Bottom sheet biến thể. "Xem tất cả" → Danh sách đánh giá.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="img" style="width:100%;height:150px;position:relative"><i class="ti ti-photo" style="font-size:30px" aria-hidden="true"></i><span style="position:absolute;top:6px;left:8px"><i class="ti ti-arrow-left" style="font-size:20px" aria-hidden="true"></i></span><span style="position:absolute;top:6px;right:8px"><i class="ti ti-shopping-cart" style="font-size:20px" aria-hidden="true"></i></span><span class="sm" style="position:absolute;bottom:4px">● ○ ○ ○</span></div></div>
+<div class="blk"><span class="n">2</span><div class="price" style="font-size:18px">259.000 ₫</div><div class="t1">Áo thun basic cổ tròn</div><div class="sm">Thương hiệu: Basic · ★ 4.6 (128 đánh giá)</div></div>
+<div class="blk"><span class="n">3</span><div class="row sp"><span>Phân loại: Màu, Size</span><i class="ti ti-chevron-right" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">4</span><div class="t1">Mô tả</div><div class="sm">Chất liệu cotton 100%, form regular, thoáng mát...</div></div>
+<div class="blk"><span class="n">5</span><div class="row sp"><span class="t1">Đánh giá (128)</span><span style="color:var(--ac)">Xem tất cả</span></div><div class="hr"></div><div class="sm"><b>Nguyen Lan</b> ★★★★★<br>Vải mát, giao nhanh</div></div>
+<div class="blk"><span class="n">6</span><div class="row"><div class="btn g" style="flex:1"><i class="ti ti-shopping-cart-plus" aria-hidden="true"></i> Thêm vào giỏ</div><div class="btn" style="flex:1">Mua ngay</div></div></div>
+<div class="blk"><span class="n">7</span><div class="c sm">Loading / Lỗi + Thử lại / Không tìm thấy sản phẩm</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Ảnh và header trong suốt</td><td><span class="tag">C2</span></td><td>Ảnh trượt ngang (slider) theo danh sách ảnh sản phẩm, ảnh chính đứng đầu. Nút back và giỏ nổi trên ảnh.</td></tr>
+<tr><td>2</td><td>Giá, tên, thương hiệu, điểm</td><td>–</td><td>Tĩnh. Điểm lấy từ <code>rating</code> của sản phẩm.</td></tr>
+<tr><td>3</td><td>Chọn phân loại</td><td>–</td><td>Bấm mở bottom sheet chọn biến thể.</td></tr>
+<tr><td>4</td><td>Mô tả</td><td>–</td><td>Văn bản, thu gọn 3 dòng, có "Xem thêm".</td></tr>
+<tr><td>5</td><td>Đánh giá nổi bật</td><td><span class="tag">C12</span></td><td>Hiện 2 đánh giá đầu tiên. Ẩn khối nếu chưa có đánh giá.</td></tr>
+<tr><td>6</td><td>Thanh hành động dưới</td><td><span class="tag">C10</span></td><td>Cố định đáy màn hình. Cả hai nút đều mở bottom sheet biến thể; "Mua ngay" sau đó đi thẳng Thanh toán.</td></tr>
+<tr><td>7</td><td>Trạng thái</td><td><span class="tag">C5</span></td><td>Khi API 404 hiện "Sản phẩm không còn tồn tại".</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="variant"><div class="sh"><h2>8. Chọn biến thể (bottom sheet)</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>Dữ liệu biến thể đã có trong ProductDto; POST /api/carts</code></div><div class="meta"><b>Điều hướng:</b> Thêm vào giỏ → đóng sheet, báo "Đã thêm vào giỏ". Mua ngay → Thanh toán.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="row"><div class="img" style="width:60px;height:60px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div><div class="price" style="font-size:16px">259.000 ₫</div><div class="sm">Còn 12 sản phẩm</div></div><span style="margin-left:auto"><i class="ti ti-x" style="font-size:20px" aria-hidden="true"></i></span></div></div>
+<div class="blk"><span class="n">2</span><div class="lbl">Màu</div><span class="chip on">Trắng</span> <span class="chip">Đen</span> <span class="chip">Xanh</span> </div>
+<div class="blk"><span class="n">3</span><div class="lbl">Size</div><span class="chip">S</span> <span class="chip on">M</span> <span class="chip dis">L</span> <span class="chip">XL</span></div>
+<div class="blk"><span class="n">4</span><div class="row sp"><span>Số lượng</span><span class="chip">− &nbsp;1&nbsp; +</span></div></div>
+<div class="blk"><span class="n">5</span><div class="btn ">Thêm vào giỏ</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Đầu sheet</td><td>–</td><td>Ảnh nhỏ, giá và tồn kho của biến thể đang chọn. Chưa chọn thì hiện khoảng giá.</td></tr>
+<tr><td>2</td><td>Chọn màu</td><td>–</td><td>Một lựa chọn. Màu hết hàng bị làm mờ, không chọn được.</td></tr>
+<tr><td>3</td><td>Chọn size</td><td>–</td><td>Size hết hàng (tồn kho 0) làm mờ, gạch ngang.</td></tr>
+<tr><td>4</td><td>Số lượng</td><td><span class="tag">C9</span></td><td>Tối thiểu 1, tối đa bằng tồn kho của biến thể.</td></tr>
+<tr><td>5</td><td>Nút xác nhận</td><td><span class="tag">C6</span></td><td>Yêu cầu đã chọn đủ màu và size. Chưa đăng nhập thì chuyển Đăng nhập.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="reviews"><div class="sh"><h2>9. Danh sách đánh giá</h2><span class="grp">Sản phẩm</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/reviews/product/{productId}, PUT/DELETE /api/reviews/{id}</code></div><div class="meta"><b>Điều hướng:</b> Nút Sửa (chỉ trên đánh giá của mình) → Viết hoặc sửa đánh giá.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Đánh giá sản phẩm</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row"><div style="font-size:26px;font-weight:600;color:var(--tx)">4.6</div><div>★★★★★<div class="sm">128 đánh giá</div></div></div></div>
+<div class="blk"><span class="n">3</span><div class="row"><div class="img" style="width:32px;height:32px"><i class="ti ti-user" style="font-size:18px" aria-hidden="true"></i></div><div><div class="t1 sm">Nguyen Lan</div><div class="sm">★★★★★ · 12/10/2026</div></div></div><div class="sm" style="margin-top:4px">Vải mát, giao nhanh.</div></div>
+<div class="blk"><span class="n">4</span><div class="row"><div class="img" style="width:32px;height:32px"><i class="ti ti-user" style="font-size:18px" aria-hidden="true"></i></div><div><div class="t1 sm">Bạn</div><div class="sm">★★★★☆</div></div><span class="sm" style="margin-left:auto;color:var(--ac)">Sửa · Xóa</span></div><div class="sm" style="margin-top:4px">Đẹp nhưng hơi rộng.</div></div>
+<div class="blk"><span class="n">5</span><div class="c sm">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá.</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back.</td></tr>
+<tr><td>2</td><td>Tổng quan điểm</td><td><span class="tag">C12</span></td><td>Điểm trung bình tính từ danh sách đã tải.</td></tr>
+<tr><td>3</td><td>Một đánh giá</td><td><span class="tag">C12</span></td><td>Ảnh đại diện (chữ cái đầu nếu chưa có), tên, sao, ngày, nhận xét. API chỉ trả tên và avatar, không trả email hay số điện thoại.</td></tr>
+<tr><td>4</td><td>Đánh giá của mình</td><td><span class="tag">C12</span><span class="tag">C14</span></td><td>Có thêm Sửa và Xóa. Xóa hỏi xác nhận bằng dialog.</td></tr>
+<tr><td>5</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Cùng Loading và Lỗi + Thử lại.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="cart"><div class="sh"><h2>10. Giỏ hàng</h2><span class="grp">Giỏ hàng</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/carts/user/{userId}, PUT /api/carts/{id}, DELETE /api/carts/{id}</code></div><div class="meta"><b>Điều hướng:</b> Mua hàng → Thanh toán. Bấm sản phẩm → Chi tiết.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Giỏ hàng (2)</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M</div><div class="sm price">259.000 ₫</div></div><span class="chip">− 2 +</span></div><div class="hr"></div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Quần jean</div><div class="sm">Xanh, 32</div><div class="sm price">399.000 ₫</div></div><span class="chip">− 1 +</span></div></div>
+<div class="blk"><span class="n">3</span><div class="row sp"><span>Tạm tính</span><span class="t1">917.000 ₫</span></div></div>
+<div class="blk"><span class="n">4</span><div class="row sp"><div><div class="sm">Tổng cộng</div><div class="price" style="font-size:16px">917.000 ₫</div></div><div class="btn" style="width:120px">Mua hàng</div></div></div>
+<div class="blk"><span class="n">5</span><div class="c"><i class="ti ti-shopping-cart-off" style="font-size:28px" aria-hidden="true"></i><div class="sm">Giỏ hàng đang trống.<br>Tiếp tục mua sắm để thêm sản phẩm.</div><div class="btn g" style="margin-top:6px">Đi mua sắm</div></div></div>
+<div class="blk over"><span class="n">6</span><div class="c"><div class="t1">Xóa sản phẩm?</div><div class="sm">Sản phẩm sẽ bị xóa khỏi giỏ hàng.</div><div class="row" style="margin-top:6px"><div class="btn g" style="flex:1">Hủy</div><div class="btn d" style="flex:1">Xóa</div></div></div></div>
+<div class="blk"><span class="n">7</span><div class="navb"><div class=""><i class="ti ti-home" aria-hidden="true"></i><span>Trang chủ</span></div><div class="on"><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Giỏ hàng</span></div><div class=""><i class="ti ti-receipt" aria-hidden="true"></i><span>Đơn hàng</span></div><div class=""><i class="ti ti-user" aria-hidden="true"></i><span>Tài khoản</span></div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Số lượng dòng trong giỏ. Là màn tab nên không có nút back.</td></tr>
+<tr><td>2</td><td>Danh sách dòng giỏ</td><td><span class="tag">C8</span><span class="tag">C9</span></td><td>Mỗi dòng: ảnh, tên, phân loại, đơn giá, bộ chỉnh số lượng. Đổi số lượng gọi <code>PUT</code>. Vuốt trái hoặc nút thùng rác để xóa.</td></tr>
+<tr><td>3</td><td>Tổng tiền</td><td>–</td><td>Tự cộng từ các dòng.</td></tr>
+<tr><td>4</td><td>Thanh hành động dưới</td><td><span class="tag">C10</span></td><td>Cố định đáy, nằm trên thanh điều hướng. Mua hàng sang Thanh toán.</td></tr>
+<tr><td>5</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Hiện thay các khối trên khi giỏ trống.</td></tr>
+<tr><td>6</td><td>Dialog xác nhận xóa</td><td><span class="tag">C14</span></td><td>Hiện khi xóa một dòng.</td></tr>
+<tr><td>7</td><td>Thanh điều hướng dưới</td><td><span class="tag">C4</span></td><td>Tab Giỏ hàng đang chọn.</td></tr>
+</table>
+<div class="note"><b>Lưu ý:</b> Chưa đăng nhập thì tab Giỏ hàng hiện lời mời đăng nhập thay vì danh sách.</div>
+</div></div></section>
+<section class="scr" id="checkout"><div class="sh"><h2>11. Thanh toán (COD)</h2><span class="grp">Thanh toán</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/addresses/my-addresses, POST /api/orders</code></div><div class="meta"><b>Điều hướng:</b> Đổi địa chỉ → Danh sách địa chỉ (chế độ chọn). Đặt hàng thành công → Kết quả đặt hàng.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Thanh toán</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="t1" style="margin-bottom:4px">Địa chỉ nhận hàng</div><div class="pc"><div class="t1 sm">Nhà riêng · 0911 222 333</div><div class="sm">12 Nguyễn Trãi, Quận 1, Hồ Chí Minh</div><div class="sm" style="color:var(--ac)">Đổi địa chỉ</div></div></div>
+<div class="blk"><span class="n">3</span><div class="t1" style="margin-bottom:4px">Sản phẩm (2)</div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M × 2</div><div class="sm price">518.000 ₫</div></div></div><div class="hr"></div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Quần jean</div><div class="sm">Xanh, 32 × 1</div><div class="sm price">399.000 ₫</div></div></div></div>
+<div class="blk"><span class="n">4</span><div class="row sp"><span class="t1">Phương thức thanh toán</span><span>Thanh toán khi nhận hàng (COD)</span></div></div>
+<div class="blk"><span class="n">5</span><div class="lbl">Ghi chú (không bắt buộc)</div><div class="fld"><span>Giao giờ hành chính</span></div></div>
+<div class="blk"><span class="n">6</span><div class="row sp"><span>Tiền hàng</span><span>917.000 ₫</span></div><div class="row sp"><span>Phí vận chuyển</span><span>0 ₫</span></div><div class="row sp t1"><span>Tổng thanh toán</span><span class="price">917.000 ₫</span></div></div>
+<div class="blk"><span class="n">7</span><div class="row sp"><div><div class="sm">Tổng thanh toán</div><div class="price" style="font-size:16px">917.000 ₫</div></div><div class="btn" style="width:120px">Đặt hàng</div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back về Giỏ hàng.</td></tr>
+<tr><td>2</td><td>Địa chỉ giao hàng</td><td><span class="tag">C11</span></td><td>Tự chọn địa chỉ đầu tiên. Chưa có địa chỉ thì hiện nút "Thêm địa chỉ". Khi đặt hàng, app ghép thành một chuỗi gửi vào <code>shippingAddress</code>.</td></tr>
+<tr><td>3</td><td>Danh sách sản phẩm</td><td><span class="tag">C8</span></td><td>Chỉ đọc, không có bộ chỉnh số lượng.</td></tr>
+<tr><td>4</td><td>Phương thức thanh toán</td><td>–</td><td>Cố định COD, chưa cho chọn. Gửi <code>paymentMethod=COD</code>.</td></tr>
+<tr><td>5</td><td>Ghi chú</td><td><span class="tag">C6</span></td><td>Gửi vào <code>notes</code>.</td></tr>
+<tr><td>6</td><td>Tóm tắt</td><td>–</td><td>Tổng do máy chủ tính; app hiển thị bản ước tính. Backend chưa có phí ship nên là 0.</td></tr>
+<tr><td>7</td><td>Thanh hành động dưới</td><td><span class="tag">C10</span></td><td>Bấm: spinner, khóa nút. Thành công → Kết quả. Lỗi 409 (hết hàng) → khối lỗi ở màn Kết quả.</td></tr>
+</table>
+<div class="note"><b>Lưu ý:</b> Không có địa chỉ hoặc giỏ trống thì khóa nút Đặt hàng và hiển thị lý do.</div>
+</div></div></section>
+<section class="scr" id="addrlist"><div class="sh"><h2>12. Danh sách địa chỉ</h2><span class="grp">Thanh toán</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/addresses/my-addresses, DELETE /api/addresses/{id}</code></div><div class="meta"><b>Điều hướng:</b> Thêm hoặc Sửa → Biểu mẫu địa chỉ. Ở chế độ chọn (từ Thanh toán): bấm một địa chỉ để chọn và quay lại.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Địa chỉ của tôi</span><span class="r">+ Thêm</span></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><span class="t1 sm">Nhà riêng · 0911 222 333</span><span class="st b">Đang chọn</span></div><div class="sm">12 Nguyễn Trãi, Quận 1, Hồ Chí Minh · 700000</div><div class="row sm" style="color:var(--ac);gap:14px;margin-top:4px"><span>Sửa</span><span style="color:var(--rd)">Xóa</span></div></div>
+<div class="blk"><span class="n">3</span><div class="t1 sm">Công ty · 0988 000 111</div><div class="sm">45 Lê Lợi, Quận 3, Hồ Chí Minh · 700000</div><div class="row sm" style="color:var(--ac);gap:14px;margin-top:4px"><span>Sửa</span><span style="color:var(--rd)">Xóa</span></div></div>
+<div class="blk"><span class="n">4</span><div class="c"><i class="ti ti-map-pin-off" style="font-size:28px" aria-hidden="true"></i><div class="sm">Bạn chưa có địa chỉ nào.</div></div></div>
+<div class="blk"><span class="n">5</span><div class="btn ">Thêm địa chỉ mới</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút Thêm ở góc phải.</td></tr>
+<tr><td>2</td><td>Thẻ địa chỉ</td><td><span class="tag">C11</span><span class="tag">C14</span></td><td>Chế độ chọn: hiện "Đang chọn" cho địa chỉ hiện tại. Xóa hỏi xác nhận bằng dialog.</td></tr>
+<tr><td>3</td><td>Thẻ địa chỉ (tiếp)</td><td><span class="tag">C11</span></td><td>Lặp theo số địa chỉ.</td></tr>
+<tr><td>4</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Cùng Loading và Lỗi + Thử lại.</td></tr>
+<tr><td>5</td><td>Nút thêm</td><td><span class="tag">C6</span></td><td>Dưới cùng, mở Biểu mẫu địa chỉ.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="addrform"><div class="sh"><h2>13. Thêm hoặc sửa địa chỉ</h2><span class="grp">Thanh toán</span></div>
+<div class="meta"><b>API:</b> <code>POST /api/addresses, PUT /api/addresses/{id}</code></div><div class="meta"><b>Điều hướng:</b> Lưu thành công → quay lại màn trước.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Thêm địa chỉ</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="lbl">Tên gợi nhớ (không bắt buộc)</div><div class="fld"><span>Nhà riêng</span></div></div>
+<div class="blk"><span class="n">3</span><div class="lbl">Số điện thoại</div><div class="fld"><span>09xx xxx xxx</span><i class="ti ti-phone" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">4</span><div class="lbl">Tỉnh, quận</div><div class="fld"><span>Quận 1</span></div></div>
+<div class="blk"><span class="n">5</span><div class="lbl">Thành phố</div><div class="fld"><span>Hồ Chí Minh</span></div></div>
+<div class="blk"><span class="n">6</span><div class="lbl">Số nhà, đường</div><div class="fld"><span>12 Nguyễn Trãi</span></div></div>
+<div class="blk"><span class="n">7</span><div class="lbl">Mã bưu chính</div><div class="fld"><span>700000</span></div></div>
+<div class="blk"><span class="n">8</span><div class="btn ">Lưu địa chỉ</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Tiêu đề đổi thành "Sửa địa chỉ" khi chỉnh sửa.</td></tr>
+<tr><td>2</td><td>Tên gợi nhớ</td><td><span class="tag">C6</span></td><td>Không bắt buộc.</td></tr>
+<tr><td>3</td><td>Số điện thoại</td><td><span class="tag">C6</span></td><td>Bắt buộc, bàn phím số.</td></tr>
+<tr><td>4</td><td>Tỉnh, quận</td><td><span class="tag">C6</span></td><td>Bắt buộc (trường <code>state</code>).</td></tr>
+<tr><td>5</td><td>Thành phố</td><td><span class="tag">C6</span></td><td>Bắt buộc.</td></tr>
+<tr><td>6</td><td>Số nhà, đường</td><td><span class="tag">C6</span></td><td>Bắt buộc.</td></tr>
+<tr><td>7</td><td>Mã bưu chính</td><td><span class="tag">C6</span></td><td>Bắt buộc (trường <code>zipCode</code>).</td></tr>
+<tr><td>8</td><td>Nút Lưu</td><td><span class="tag">C6</span></td><td>Kiểm tra các ô bắt buộc trước khi gọi API. Lỗi thì hiện dưới từng ô.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="result"><div class="sh"><h2>14. Kết quả đặt hàng</h2><span class="grp">Thanh toán</span></div>
+<div class="meta"><b>API:</b> <code>Không gọi API (dữ liệu từ phản hồi POST /api/orders)</code></div><div class="meta"><b>Điều hướng:</b> Xem đơn hàng → Chi tiết đơn. Tiếp tục mua sắm → Trang chủ. Chặn nút back về Thanh toán.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="c"><i class="ti ti-circle-check" style="font-size:44px" aria-hidden="true"></i><div class="t1" style="font-size:17px">Đặt hàng thành công</div><div class="sm">Mã đơn SE-20261013-001</div></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><span>Tổng thanh toán</span><span class="price">917.000 ₫</span></div><div class="row sp"><span>Phương thức</span><span>COD</span></div><div class="row sp"><span>Trạng thái</span><span class="st a">Chờ xử lý</span></div></div>
+<div class="blk"><span class="n">3</span><div class="btn ">Xem đơn hàng</div><div style="height:6px"></div><div class="btn g">Tiếp tục mua sắm</div></div>
+<div class="blk err"><span class="n">4</span><div class="c"><i class="ti ti-alert-triangle" style="font-size:34px" aria-hidden="true"></i><div class="t1">Không thể đặt hàng</div><div class="sm">Một số sản phẩm không đủ hàng. Vui lòng quay lại giỏ hàng để điều chỉnh.</div><div class="btn g">Về giỏ hàng</div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Thông báo thành công</td><td><span class="tag">C1</span></td><td>Mã đơn lấy từ <code>orderNumber</code>.</td></tr>
+<tr><td>2</td><td>Tóm tắt đơn</td><td><span class="tag">C13</span></td><td>Chỉ đọc.</td></tr>
+<tr><td>3</td><td>Hai nút điều hướng</td><td><span class="tag">C6</span></td><td>Nút chính là Xem đơn hàng.</td></tr>
+<tr><td>4</td><td>Biến thể: thất bại</td><td><span class="tag">C5</span></td><td>Hiện khi API trả 409 (hết hàng) hoặc lỗi khác. Không có đơn nào được tạo.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="orders"><div class="sh"><h2>15. Danh sách đơn hàng</h2><span class="grp">Đơn hàng</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/orders/me</code></div><div class="meta"><b>Điều hướng:</b> Bấm một đơn → Chi tiết đơn.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Đơn hàng của tôi</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><span class="chip on">Tất cả</span> <span class="chip">Chờ xử lý</span> <span class="chip">Đang giao</span> <span class="chip">Chờ nhận</span> <span class="chip">Hoàn thành</span> <span class="chip">Đã hủy</span> <span class="chip">Hoàn trả</span> </div>
+<div class="blk"><span class="n">3</span><div class="row sp"><span class="t1 sm">SE-20261013-001</span><span class="st a">Chờ xử lý</span></div><div class="sm">13/10/2026</div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M × 2</div><div class="sm price">518.000 ₫</div></div></div><div class="sm">và 1 sản phẩm khác</div><div class="hr"></div><div class="row sp"><span class="sm">2 sản phẩm</span><span class="price">917.000 ₫</span></div></div>
+<div class="blk"><span class="n">4</span><div class="row sp"><span class="t1 sm">SE-20261001-007</span><span class="st g">Hoàn thành</span></div><div class="sm">01/10/2026</div></div>
+<div class="blk"><span class="n">5</span><div class="c"><i class="ti ti-receipt-off" style="font-size:28px" aria-hidden="true"></i><div class="sm">Chưa có đơn hàng nào.</div></div></div>
+<div class="blk"><span class="n">6</span><div class="navb"><div class=""><i class="ti ti-home" aria-hidden="true"></i><span>Trang chủ</span></div><div class=""><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Giỏ hàng</span></div><div class="on"><i class="ti ti-receipt" aria-hidden="true"></i><span>Đơn hàng</span></div><div class=""><i class="ti ti-user" aria-hidden="true"></i><span>Tài khoản</span></div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Là màn tab nên không có nút back.</td></tr>
+<tr><td>2</td><td>Tab trạng thái</td><td>–</td><td>Cuộn ngang. API trả toàn bộ đơn nên app lọc tại chỗ theo trạng thái. Tương ứng <code>PENDING, SHIPPING, WAIT_DELIVER, PAID, CANCELED, REFUND</code>.</td></tr>
+<tr><td>3</td><td>Thẻ đơn hàng</td><td><span class="tag">C8</span><span class="tag">C13</span></td><td>Hiện sản phẩm đầu tiên, tổng tiền, nhãn trạng thái. Sắp xếp mới nhất lên đầu.</td></tr>
+<tr><td>4</td><td>Thẻ đơn hàng (tiếp)</td><td><span class="tag">C13</span></td><td>Lặp theo số đơn.</td></tr>
+<tr><td>5</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Cùng Loading và Lỗi + Thử lại, kéo xuống để làm mới.</td></tr>
+<tr><td>6</td><td>Thanh điều hướng dưới</td><td><span class="tag">C4</span></td><td>Tab Đơn hàng đang chọn.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="orderdetail"><div class="sh"><h2>16. Chi tiết đơn hàng</h2><span class="grp">Đơn hàng</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/orders/{id}</code></div><div class="meta"><b>Điều hướng:</b> Nút Đánh giá trên một dòng → Viết đánh giá.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Chi tiết đơn hàng</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><div><div class="t1">SE-20261013-001</div><div class="sm">Đặt lúc 13/10/2026 04:11</div></div><span class="st a">Chờ xử lý</span></div></div>
+<div class="blk"><span class="n">3</span><div class="t1" style="margin-bottom:4px">Địa chỉ nhận hàng</div><div class="sm">Nguyen Van A - 0911222333 - 12 Nguyễn Trãi, Quận 1, HCM</div></div>
+<div class="blk"><span class="n">4</span><div class="t1" style="margin-bottom:4px">Sản phẩm</div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M × 2</div><div class="sm price">518.000 ₫</div></div></div><div class="row" style="justify-content:flex-end;margin-top:4px"><span class="chip on">Đánh giá</span></div></div>
+<div class="blk"><span class="n">5</span><div class="row sp"><span>Thanh toán</span><span>COD · Chưa thanh toán</span></div><div class="row sp"><span>Ghi chú</span><span>Giao giờ hành chính</span></div><div class="hr"></div><div class="row sp t1"><span>Tổng cộng</span><span class="price">917.000 ₫</span></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back.</td></tr>
+<tr><td>2</td><td>Mã đơn và trạng thái</td><td><span class="tag">C13</span></td><td>Trạng thái theo bảng chuyển trạng thái của backend.</td></tr>
+<tr><td>3</td><td>Địa chỉ giao hàng</td><td><span class="tag">C11</span></td><td>Đơn lưu địa chỉ là một chuỗi, nên hiển thị nguyên chuỗi, không tách thành thẻ.</td></tr>
+<tr><td>4</td><td>Danh sách sản phẩm</td><td><span class="tag">C8</span></td><td>Nút Đánh giá chỉ hiện khi đơn đã hoàn thành (PAID) và dòng chưa đánh giá (<code>isReviewed=false</code>).</td></tr>
+<tr><td>5</td><td>Thanh toán và tổng</td><td>–</td><td>Chỉ đọc.</td></tr>
+</table>
+<div class="note"><b>Lưu ý:</b> Backend chỉ cho Admin đổi trạng thái đơn, nên khách chưa thể tự hủy đơn. Giai đoạn đầu không có nút "Hủy đơn" (muốn có cần bổ sung API ở backend). Vì vậy cũng chưa cần dialog xác nhận ở màn này.</div>
+</div></div></section>
+<section class="scr" id="unreviewed"><div class="sh"><h2>17. Đơn chưa đánh giá</h2><span class="grp">Đơn hàng</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/orders/unreviewed</code></div><div class="meta"><b>Điều hướng:</b> Nút Đánh giá → Viết đánh giá.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Chờ đánh giá</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M</div><div class="sm price">259.000 ₫</div></div><span class="chip on">Đánh giá</span></div><div class="hr"></div><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Quần jean</div><div class="sm">Xanh, 32</div><div class="sm price">399.000 ₫</div></div><span class="chip on">Đánh giá</span></div></div>
+<div class="blk"><span class="n">3</span><div class="c"><i class="ti ti-star-off" style="font-size:28px" aria-hidden="true"></i><div class="sm">Bạn đã đánh giá hết sản phẩm đã mua.</div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back về Tài khoản.</td></tr>
+<tr><td>2</td><td>Danh sách dòng chưa đánh giá</td><td><span class="tag">C8</span></td><td>Mỗi dòng đã mua mà chưa đánh giá. Đánh giá xong thì dòng biến mất khỏi danh sách.</td></tr>
+<tr><td>3</td><td>Trạng thái rỗng</td><td><span class="tag">C5</span></td><td>Cùng Loading và Lỗi + Thử lại.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="review"><div class="sh"><h2>18. Viết hoặc sửa đánh giá</h2><span class="grp">Đơn hàng</span></div>
+<div class="meta"><b>API:</b> <code>POST /api/reviews, PUT /api/reviews/{id}</code></div><div class="meta"><b>Điều hướng:</b> Gửi thành công → quay lại màn trước, hiện "Cảm ơn bạn đã đánh giá".</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Đánh giá sản phẩm</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row"><div class="img" style="width:44px;height:44px"><i class="ti ti-photo" style="font-size:18px" aria-hidden="true"></i></div><div style="flex:1;min-width:0"><div class="t1 sm">Áo thun basic</div><div class="sm">Trắng, M</div><div class="sm price"></div></div></div></div>
+<div class="blk"><span class="n">3</span><div class="c"><div style="font-size:28px;color:var(--am)">★★★★☆</div><div class="sm">Rất tốt</div></div></div>
+<div class="blk"><span class="n">4</span><div class="lbl">Nhận xét (không bắt buộc)</div><div class="fld"><span>Chia sẻ trải nghiệm của bạn</span></div></div>
+<div class="blk"><span class="n">5</span><div class="btn ">Gửi đánh giá</div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Tiêu đề "Sửa đánh giá" khi chỉnh sửa.</td></tr>
+<tr><td>2</td><td>Sản phẩm được đánh giá</td><td><span class="tag">C8</span></td><td>Chỉ đọc. Cần <code>productId</code> và <code>orderItemId</code> của dòng đã mua.</td></tr>
+<tr><td>3</td><td>Chọn số sao</td><td><span class="tag">C12</span></td><td>Bấm để chọn 1 đến 5 sao, bắt buộc.</td></tr>
+<tr><td>4</td><td>Nhận xét</td><td><span class="tag">C6</span></td><td>Nhiều dòng, không bắt buộc.</td></tr>
+<tr><td>5</td><td>Nút Gửi</td><td><span class="tag">C6</span></td><td>Chưa chọn sao thì báo lỗi dưới thanh sao. Khi sửa đổi thành "Lưu thay đổi".</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="account"><div class="sh"><h2>19. Tài khoản</h2><span class="grp">Tài khoản</span></div>
+<div class="meta"><b>API:</b> <code>GET /api/user/profile</code></div><div class="meta"><b>Điều hướng:</b> Mỗi dòng menu mở một màn tương ứng.</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="row"><div class="img" style="width:56px;height:56px"><i class="ti ti-user" style="font-size:18px" aria-hidden="true"></i></div><div><div class="t1" style="font-size:16px">Nguyen Lan</div><div class="sm">lan@example.com</div><div class="sm">0911 222 333</div></div></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><span><i class="ti ti-receipt" aria-hidden="true"></i> Đơn hàng của tôi</span><i class="ti ti-chevron-right" aria-hidden="true"></i></div><div class="hr"></div><div class="row sp"><span><i class="ti ti-star" aria-hidden="true"></i> Chờ đánh giá</span><i class="ti ti-chevron-right" aria-hidden="true"></i></div><div class="hr"></div><div class="row sp"><span><i class="ti ti-map-pin" aria-hidden="true"></i> Địa chỉ của tôi</span><i class="ti ti-chevron-right" aria-hidden="true"></i></div><div class="hr"></div><div class="row sp"><span><i class="ti ti-settings" aria-hidden="true"></i> Cài đặt</span><i class="ti ti-chevron-right" aria-hidden="true"></i></div></div>
+<div class="blk"><span class="n">3</span><div class="c sm">Chưa đăng nhập:<br>Đăng nhập để xem đơn hàng và địa chỉ</div><div class="row" style="margin-top:6px"><div class="btn" style="flex:1">Đăng nhập</div><div class="btn g" style="flex:1">Đăng ký</div></div></div>
+<div class="blk"><span class="n">4</span><div class="navb"><div class=""><i class="ti ti-home" aria-hidden="true"></i><span>Trang chủ</span></div><div class=""><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Giỏ hàng</span></div><div class=""><i class="ti ti-receipt" aria-hidden="true"></i><span>Đơn hàng</span></div><div class="on"><i class="ti ti-user" aria-hidden="true"></i><span>Tài khoản</span></div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Thông tin người dùng</td><td>–</td><td>Lấy từ hồ sơ; tải lại mỗi lần mở màn. Chưa có ảnh thì dùng chữ cái đầu.</td></tr>
+<tr><td>2</td><td>Danh sách menu</td><td>–</td><td>Mở Đơn hàng, Chờ đánh giá, Danh sách địa chỉ, Cài đặt.</td></tr>
+<tr><td>3</td><td>Biến thể: chưa đăng nhập</td><td><span class="tag">C5</span></td><td>Thay cho hai khối trên khi chưa có token.</td></tr>
+<tr><td>4</td><td>Thanh điều hướng dưới</td><td><span class="tag">C4</span></td><td>Tab Tài khoản đang chọn.</td></tr>
+</table>
+</div></div></section>
+<section class="scr" id="settings"><div class="sh"><h2>20. Cài đặt</h2><span class="grp">Tài khoản</span></div>
+<div class="meta"><b>API:</b> <code>Không gọi API (xóa token cục bộ)</code></div><div class="meta"><b>Điều hướng:</b> Đăng xuất → Đăng nhập (xóa toàn bộ dữ liệu cục bộ của phiên).</div>
+<div class="wrap"><div class="phone"><div class="screen">
+<div class="blk"><span class="n">1</span><div class="tb"><i class="ti ti-arrow-left" style="font-size:18px" aria-hidden="true"></i><span>Cài đặt</span><span class="r"></span></div></div>
+<div class="blk"><span class="n">2</span><div class="row sp"><span>Email</span><span class="sm">lan@example.com</span></div><div class="hr"></div><div class="row sp"><span>Số điện thoại</span><span class="sm">0911 222 333</span></div></div>
+<div class="blk"><span class="n">3</span><div class="row sp"><span>Giao diện</span><span class="chip">Theo hệ thống ▾</span></div></div>
+<div class="blk"><span class="n">4</span><div class="row sp"><span>Phiên bản</span><span class="sm">1.0</span></div></div>
+<div class="blk"><span class="n">5</span><div class="btn d">Đăng xuất</div></div>
+<div class="blk over"><span class="n">6</span><div class="c"><div class="t1">Đăng xuất?</div><div class="sm">Bạn sẽ cần đăng nhập lại để xem giỏ hàng và đơn hàng.</div><div class="row" style="margin-top:6px"><div class="btn g" style="flex:1">Hủy</div><div class="btn d" style="flex:1">Đăng xuất</div></div></div></div>
+</div></div><div><table><colgroup><col style="width:28px"><col style="width:28%"><col style="width:20%"><col></colgroup>
+<tr><th>#</th><th>Khối</th><th>Dùng chung</th><th>Mô tả và hành vi</th></tr>
+<tr><td>1</td><td>Header</td><td><span class="tag">C2</span></td><td>Nút back.</td></tr>
+<tr><td>2</td><td>Thông tin tài khoản</td><td>–</td><td>Chỉ đọc. Backend chưa có API sửa hồ sơ.</td></tr>
+<tr><td>3</td><td>Giao diện</td><td><span class="tag">C1</span></td><td>Sáng, tối hoặc theo hệ thống.</td></tr>
+<tr><td>4</td><td>Phiên bản app</td><td>–</td><td>Lấy từ <code>versionName</code>.</td></tr>
+<tr><td>5</td><td>Nút Đăng xuất</td><td><span class="tag">C6</span></td><td>Màu cảnh báo, bấm mở dialog xác nhận.</td></tr>
+<tr><td>6</td><td>Dialog xác nhận</td><td><span class="tag">C14</span></td><td>Xác nhận thì xóa token và về Đăng nhập.</td></tr>
+</table>
+</div></div></section>
+</div></body></html>
