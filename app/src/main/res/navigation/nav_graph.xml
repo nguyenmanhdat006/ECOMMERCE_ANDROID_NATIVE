@@ -2,10 +2,38 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/productListFragment">
+    app:startDestination="@id/homeFragment">
+
+    <!-- 4 tab của thanh điều hướng dưới. id phải trùng với id trong menu/bottom_nav_menu.xml -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.ecommerce.ui.home.HomeFragment"
+        android:label="@string/tab_home">
+        <action
+            android:id="@+id/action_home_to_detail"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <!-- Các tab chưa làm dùng chung một màn hình tạm; thay bằng Fragment thật khi làm tới -->
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
+        android:label="@string/tab_cart" />
+    <fragment
+        android:id="@+id/ordersFragment"
+        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
+        android:label="@string/tab_orders" />
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
+        android:label="@string/tab_account" />
 
     <fragment
-        android:id="@+id/productListFragment"
-        android:name="com.example.ecommerce.ui.ProductListFragment"
-        android:label="@string/title_products" />
+        android:id="@+id/productDetailFragment"
+        android:name="com.example.ecommerce.ui.product.ProductDetailFragment"
+        android:label="@string/product_details">
+        <argument
+            android:name="productId"
+            app:argType="string" />
+    </fragment>
 </navigation>
