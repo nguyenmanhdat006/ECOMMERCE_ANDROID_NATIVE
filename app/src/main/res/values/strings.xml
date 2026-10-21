@@ -1,5 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ecommerce</string>
-    <string name="title_products">Sản phẩm</string>
+
+    <string name="tab_home">Trang chủ</string>
+    <string name="tab_cart">Giỏ hàng</string>
+    <string name="tab_orders">Đơn hàng</string>
+    <string name="tab_account">Tài khoản</string>
+
+    <string name="welcome_back">Chào mừng bạn quay lại</string>
+    <string name="guest_name">Khách</string>
+    <string name="search_hint">Bạn muốn tìm gì?</string>
+    <string name="all_products">Tất cả</string>
+    <string name="featured_products">Sản phẩm nổi bật</string>
+    <string name="banner_title">Giảm 30% thời trang thể thao</string>
+    <string name="banner_subtitle">Ưu đãi có hạn. Mua ngay!</string>
+    <string name="banner_button">Mua ngay</string>
+
     <string name="retry">Thử lại</string>
+    <string name="loading">Đang tải…</string>
+    <string name="empty_products">Không tìm thấy sản phẩm nào.</string>
+    <string name="error_network">Không kết nối được máy chủ. Kiểm tra backend và mạng rồi thử lại.</string>
+    <string name="error_server">Lỗi máy chủ (%1$d). Thử lại sau.</string>
+    <string name="error_unknown">Đã có lỗi xảy ra. Thử lại sau.</string>
+
+    <string name="sort_name">Tên A–Z</string>
+    <string name="sort_price_asc">Giá tăng dần</string>
+    <string name="sort_price_desc">Giá giảm dần</string>
+    <string name="sort_rating">Đánh giá cao nhất</string>
+
+    <string name="stock_left">Còn %1$d sản phẩm</string>
+    <string name="out_of_stock">Hết hàng</string>
+    <string name="size">Size</string>
+    <string name="color">Màu</string>
+    <string name="quantity">Số lượng</string>
+    <string name="product_details">Chi tiết sản phẩm</string>
+    <string name="product_description">Mô tả sản phẩm</string>
+    <string name="brand">Thương hiệu</string>
+    <string name="category">Danh mục</string>
+    <string name="category_type">Loại</string>
+    <string name="price">Giá</string>
+    <string name="subtotal">Tạm tính</string>
+    <string name="out_of_stock_hint">Hết hàng</string>
+    <string name="add_to_cart">Thêm vào giỏ</string>
+    <string name="buy_now">Mua ngay</string>
+    <string name="pick_variant">Hãy chọn size và màu</string>
+    <string name="feature_coming">Tính năng này sẽ làm ở bước sau.</string>
+    <string name="share_product">Chia sẻ</string>
+    <string name="favorite">Yêu thích</string>
+
+    <string name="coming_soon">Màn hình này đang được phát triển.</string>
+
+    <string name="status_pending">Chờ xử lý</string>
+    <string name="status_shipping">Đang giao</string>
+    <string name="status_wait_deliver">Chờ nhận</string>
+    <string name="status_paid">Hoàn thành</string>
+    <string name="status_canceled">Đã hủy</string>
+    <string name="status_refund">Hoàn trả</string>
+
+    <string name="confirm">Xác nhận</string>
+    <string name="cancel">Hủy</string>
+    <string name="selected">Đang chọn</string>
 </resources>

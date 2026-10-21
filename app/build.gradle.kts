@@ -1,7 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
 }
 
 android {
@@ -19,6 +17,10 @@ android {
 
         // 10.0.2.2 = máy host nhìn từ emulator; đổi sang IP máy tính khi chạy máy thật
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
+
+        // true = dùng dữ liệu giả để dựng giao diện khi backend chưa chạy (xem repository/MockDataSource.java)
+        // false = gọi backend thật. Đổi xong bấm Sync Project.
+        buildConfigField("boolean", "USE_MOCK_DATA", "true")
     }
 
     buildTypes {
@@ -43,27 +45,24 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.swiperefreshlayout)
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    implementation(libs.glide)
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging)
-    implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
