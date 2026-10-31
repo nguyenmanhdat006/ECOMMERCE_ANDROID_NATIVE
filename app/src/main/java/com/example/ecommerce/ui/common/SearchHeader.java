@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -85,6 +86,28 @@ public class SearchHeader extends LinearLayout {
 
     public void setOnFilterClickListener(@Nullable OnClickListener listener) {
         filterButton.setOnClickListener(listener);
+    }
+
+    /** Đặt sẵn chữ trong ô tìm kiếm (ví dụ từ khóa truyền từ màn hình trước). */
+    public void setQuery(String text) {
+        input.setText(text);
+    }
+
+    /**
+     * Biến ô tìm kiếm thành một nút bấm: không gõ được, bấm vào thì chạy listener
+     * (Trang chủ dùng để mở màn Tìm kiếm).
+     */
+    public void setAsButton(OnClickListener listener) {
+        input.setFocusable(false);
+        input.setCursorVisible(false);
+        input.setOnClickListener(listener);
+    }
+
+    /** Đưa con trỏ vào ô tìm kiếm và bật bàn phím. */
+    public void focusInput() {
+        input.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
     }
 
     /** Điểm neo để hiển thị PopupMenu sắp xếp. */

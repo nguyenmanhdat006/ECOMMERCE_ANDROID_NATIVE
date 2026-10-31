@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Hàng đầu: nút quay lại + ô tìm kiếm + nút lọc -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="8dp">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circle_button"
+            android:contentDescription="Quay lại"
+            android:padding="13dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_back"
+            android:tint="@color/text_primary" />
+
+        <com.example.ecommerce.ui.common.SearchHeader
+            android:id="@+id/search_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Hàng thứ hai: sắp xếp, danh mục đang lọc, số bộ lọc -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/sort_button"
+            style="@style/TextAppearance.App.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/category_chip"
+            style="@style/TextAppearance.App.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_category_selected"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/filter_summary"
+            style="@style/TextAppearance.App.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/product_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="10dp"
+            android:paddingBottom="16dp" />
+
+        <com.example.ecommerce.ui.common.StateView
+            android:id="@+id/state_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/load_more_progress"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="8dp"
+            android:indeterminateTint="@color/primary"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

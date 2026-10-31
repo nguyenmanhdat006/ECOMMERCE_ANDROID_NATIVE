@@ -5,26 +5,25 @@ import android.os.Looper;
 
 import com.example.ecommerce.model.Category;
 import com.example.ecommerce.model.Product;
+import com.example.ecommerce.model.ProductFilter;
 import com.example.ecommerce.model.ProductPage;
+import com.example.ecommerce.model.ProductVariant;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * DỮ LIỆU GIẢ để dựng và kiểm tra giao diện khi backend chưa chạy.
+ * DỮ LIỆU GIẢ về sản phẩm và danh mục, dùng khi backend chưa chạy (USE_MOCK_DATA = true).
+ * Dữ liệu giả về giỏ hàng, đơn hàng, địa chỉ, đánh giá, tài khoản nằm ở MockStore.
  *
- * Bật/tắt: buildConfigField USE_MOCK_DATA trong app/build.gradle.kts (true = dùng dữ liệu giả).
- * Đổi kịch bản để xem các trạng thái giao diện: gán MockDataSource.scenario (xem enum Scenario),
- * ví dụ đặt Scenario.ERROR để xem màn hình lỗi, Scenario.EMPTY để xem màn hình rỗng.
- *
- * Dữ liệu có đủ các trường hợp: còn hàng, hết hàng, không có ảnh, không có đánh giá, không có mô tả,
- * tên rất dài, nhiều size và màu (có biến thể hết hàng), hàng mới.
+ * Đổi kịch bản để xem các trạng thái giao diện: gán MockDataSource.scenario (xem enum Scenario).
  */
 public final class MockDataSource {
 
@@ -52,59 +51,138 @@ public final class MockDataSource {
     private MockDataSource() {
     }
 
-    // ---------------------------------------------------------------- API giả
+    // ---------------------------------------------------------------- Giả lập phản hồi mạng
 
-    static void getCategories(RepositoryCallback<List<Category>> callback) {
-        respond(() -> callback.onSuccess(new ArrayList<>(categories())), callback);
+    /** Trả dữ liệu thành công sau một khoảng trễ (giống mạng thật). */
+    static <T> void success(RepositoryCallback<T> callback, T data) {
+        deliver(callback, data, null);
     }
 
-    static void getProduct(String id, RepositoryCallback<Product> callback) {
-        respond(() -> {
-            for (Product p : products()) {
-                if (p.getId().equals(id)) {
-                    callback.onSuccess(p);
-                    return;
+    /** Trả một thông báo lỗi sau một khoảng trễ. */
+    static <T> void error(RepositoryCallback<T> callback, String message) {
+        deliver(callback, null, message);
+    }
+
+    private static <T> void deliver(final RepositoryCallback<T> callback, final T data, final String errorMessage) {
+        long delay = (scenario == Scenario.SLOW) ? 3000 : 500;
+        HANDLER.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (scenario == Scenario.ERROR) {
+                    callback.onError("Không kết nối được máy chủ. (dữ liệu giả - kịch bản ERROR)");
+                } else if (errorMessage != null) {
+                    callback.onError(errorMessage);
+                } else {
+                    callback.onSuccess(data);
                 }
-            }
-            callback.onError("Không tìm thấy dữ liệu.");
-        }, callback);
-    }
-
-    static void search(String keyword, String categoryId, String sortBy, String sortDirection,
-                       int page, int size, RepositoryCallback<ProductPage> callback) {
-        respond(() -> {
-            List<Product> result = new ArrayList<>();
-            if (scenario != Scenario.EMPTY) {
-                String key = normalize(keyword);
-                for (Product p : products()) {
-                    boolean matchCategory = categoryId == null || categoryId.equals(p.getCategoryId());
-                    boolean matchKeyword = key.isEmpty()
-                            || normalize(p.getName()).contains(key)
-                            || normalize(p.getBrand()).contains(key)
-                            || normalize(p.getDescription()).contains(key);
-                    if (matchCategory && matchKeyword) {
-                        result.add(p);
-                    }
-                }
-                sort(result, sortBy, sortDirection);
-            }
-            callback.onSuccess(toPage(result, page, size));
-        }, callback);
-    }
-
-    // ---------------------------------------------------------------- tiện ích
-
-    /** Giả lập độ trễ mạng và các kịch bản lỗi. */
-    private static void respond(Runnable onSuccess, RepositoryCallback<?> callback) {
-        long delay = scenario == Scenario.SLOW ? 3000 : 500;
-        HANDLER.postDelayed(() -> {
-            if (scenario == Scenario.ERROR) {
-                callback.onError("Không kết nối được máy chủ. (dữ liệu giả - kịch bản ERROR)");
-            } else {
-                onSuccess.run();
             }
         }, delay);
     }
+
+    // ---------------------------------------------------------------- API giả: sản phẩm, danh mục
+
+    static void getCategories(RepositoryCallback<List<Category>> callback) {
+        success(callback, new ArrayList<>(categories()));
+    }
+
+    static void getProduct(String id, RepositoryCallback<Product> callback) {
+        Product found = findProduct(id);
+        if (found == null) {
+            error(callback, "Không tìm thấy dữ liệu.");
+        } else {
+            success(callback, found);
+        }
+    }
+
+    static void search(ProductFilter filter, int page, int size, RepositoryCallback<ProductPage> callback) {
+        List<Product> result = new ArrayList<>();
+        if (scenario != Scenario.EMPTY) {
+            String key = normalize(filter.keyword);
+            for (Product p : products()) {
+                if (matches(p, filter, key)) {
+                    result.add(p);
+                }
+            }
+            sort(result, filter.sortBy, filter.sortDirection);
+        }
+        success(callback, toPage(result, page, size));
+    }
+
+    /** Kiểm tra một sản phẩm có thỏa các điều kiện lọc không. */
+    private static boolean matches(Product p, ProductFilter filter, String normalizedKeyword) {
+        if (filter.categoryId != null && !filter.categoryId.equals(p.getCategoryId())) {
+            return false;
+        }
+        if (!normalizedKeyword.isEmpty()) {
+            boolean found = normalize(p.getName()).contains(normalizedKeyword)
+                    || normalize(p.getBrand()).contains(normalizedKeyword)
+                    || normalize(p.getDescription()).contains(normalizedKeyword);
+            if (!found) {
+                return false;
+            }
+        }
+        if (filter.brand != null && !filter.brand.isEmpty()
+                && !normalize(p.getBrand()).equals(normalize(filter.brand))) {
+            return false;
+        }
+        if (filter.minPrice != null && p.getPrice() < filter.minPrice) {
+            return false;
+        }
+        if (filter.maxPrice != null && p.getPrice() > filter.maxPrice) {
+            return false;
+        }
+        double rating = (p.getRating() == null) ? 0 : p.getRating();
+        if (filter.minRating != null && rating < filter.minRating) {
+            return false;
+        }
+        if (filter.onlyNew && !p.isNewArrival()) {
+            return false;
+        }
+        return true;
+    }
+
+    // ---------------------------------------------------------------- Tra cứu cho MockStore
+
+    /** Toàn bộ sản phẩm giả. */
+    static List<Product> allProducts() {
+        return products();
+    }
+
+    static Product findProduct(String id) {
+        for (Product p : products()) {
+            if (p.getId().equals(id)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /** Tìm sản phẩm chứa một biến thể (dùng khi thêm giỏ hàng, tạo đơn). */
+    static Product findProductByVariantId(String variantId) {
+        for (Product p : products()) {
+            for (ProductVariant v : p.getVariants()) {
+                if (v.getId().equals(variantId)) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
+    static ProductVariant findVariant(String variantId) {
+        Product p = findProductByVariantId(variantId);
+        if (p == null) {
+            return null;
+        }
+        for (ProductVariant v : p.getVariants()) {
+            if (v.getId().equals(variantId)) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    // ---------------------------------------------------------------- Tiện ích
 
     private static ProductPage toPage(List<Product> all, int page, int size) {
         int total = all.size();
@@ -121,19 +199,26 @@ public final class MockDataSource {
         return GSON.fromJson(json, ProductPage.class);
     }
 
-    private static void sort(List<Product> list, String sortBy, String sortDirection) {
-        Comparator<Product> comparator;
-        if ("price".equals(sortBy)) {
-            comparator = Comparator.comparingDouble(Product::getPrice);
-        } else if ("rating".equals(sortBy)) {
-            comparator = Comparator.comparingDouble(p -> p.getRating() == null ? 0 : p.getRating());
-        } else {
-            comparator = Comparator.comparing(p -> normalize(p.getName()));
-        }
+    /** Sắp xếp theo tên, giá hoặc điểm đánh giá, tăng hoặc giảm dần. */
+    private static void sort(List<Product> list, final String sortBy, String sortDirection) {
+        Comparator<Product> comparator = new Comparator<Product>() {
+            @Override
+            public int compare(Product a, Product b) {
+                if ("price".equals(sortBy)) {
+                    return Double.compare(a.getPrice(), b.getPrice());
+                }
+                if ("rating".equals(sortBy)) {
+                    double ra = (a.getRating() == null) ? 0 : a.getRating();
+                    double rb = (b.getRating() == null) ? 0 : b.getRating();
+                    return Double.compare(ra, rb);
+                }
+                return normalize(a.getName()).compareTo(normalize(b.getName()));
+            }
+        };
+        Collections.sort(list, comparator);
         if ("desc".equals(sortDirection)) {
-            comparator = comparator.reversed();
+            Collections.reverse(list);
         }
-        list.sort(comparator);
     }
 
     /** Bỏ dấu tiếng Việt và chữ hoa để tìm kiếm giống backend ("ao" khớp "Áo"). */
@@ -145,13 +230,13 @@ public final class MockDataSource {
         return s.replace('đ', 'd').replace('Đ', 'D').toLowerCase(Locale.ROOT).trim();
     }
 
-    // ---------------------------------------------------------------- dữ liệu
+    // ---------------------------------------------------------------- Dữ liệu giả
 
     private static synchronized List<Category> categories() {
         if (CATEGORIES.isEmpty()) {
-            CATEGORIES.add(category("mock-c-men", "Thời trang nam", "MEN"));
-            CATEGORIES.add(category("mock-c-women", "Thời trang nữ", "WOMEN"));
-            CATEGORIES.add(category("mock-c-acc", "Phụ kiện", "ACC"));
+            CATEGORIES.add(category("mock-c-men", "Thời trang nam", "MEN", "Áo thun", "Áo sơ mi", "Quần jean"));
+            CATEGORIES.add(category("mock-c-women", "Thời trang nữ", "WOMEN", "Váy", "Đầm", "Áo khoác"));
+            CATEGORIES.add(category("mock-c-acc", "Phụ kiện", "ACC", "Mũ", "Túi", "Giày"));
         }
         return CATEGORIES;
     }
@@ -168,7 +253,8 @@ public final class MockDataSource {
         String[] sizesShoes = {"38", "39", "40", "41", "42", "43"};
         String[] free = {"Free size"};
 
-        //                id        tên                                          mô tả                    giá     thương hiệu  điểm  danh mục loại       mới    ảnh size         màu                              tồn kho
+        // Thứ tự tham số: id, tên, mô tả, giá, thương hiệu, điểm, danh mục, loại, hàng mới,
+        //                 số ảnh, các size, các màu, tồn kho cơ bản
         PRODUCTS.add(product("mock-p-01", "Áo thun basic cổ tròn", "Cotton 100%, form regular, thoáng mát.", 259000, "Routine", 4.5, men, "Áo thun", false, 3, sizesTop, new String[]{"Trắng", "Đen"}, 12));
         PRODUCTS.add(product("mock-p-02", "Áo polo pique", "Áo polo vải cá sấu, cổ dệt bo.", 349000, "Routine", 4.2, men, "Áo polo", false, 2, sizesTop, new String[]{"Xanh navy", "Trắng"}, 8));
         PRODUCTS.add(product("mock-p-03", "Quần jean slim fit", "Denim co giãn nhẹ, ôm vừa phải.", 899000, "Levi's", 4.6, men, "Quần jean", false, 2, sizesJeans, new String[]{"Xanh đậm"}, 6));
@@ -178,7 +264,7 @@ public final class MockDataSource {
         PRODUCTS.add(product("mock-p-07", "Áo khoác gió siêu nhẹ", "Chống nước nhẹ, gấp gọn bỏ túi.", 690000, "Uniqlo", 4.7, women, "Áo khoác", true, 3, sizesTop, new String[]{"Đen", "Xám", "Be"}, 9));
         PRODUCTS.add(product("mock-p-08", "Đầm suông tay lỡ", "Dáng suông thoải mái, chất đũi mát.", 380000, "Yody", 4.1, women, "Đầm", true, 1, sizesTop, new String[]{"Kem"}, 4));
         PRODUCTS.add(product("mock-p-09", "Mũ lưỡi trai thêu logo", "Mũ cotton, khóa điều chỉnh phía sau.", 159000, "Coolmate", 4.3, acc, "Mũ", false, 2, free, new String[]{"Đen", "Trắng"}, 20));
-        // Hết hàng toàn bộ + chưa có đánh giá
+        // Hết hàng toàn bộ, chưa có đánh giá
         PRODUCTS.add(product("mock-p-10", "Mũ bucket vải dù", "Mũ bucket chống nước nhẹ. Hiện đang hết hàng để test.", 159000, "Coolmate", null, acc, "Mũ", false, 1, free, new String[]{"Rêu"}, 0));
         // Không có mô tả
         PRODUCTS.add(product("mock-p-11", "Túi tote canvas", null, 199000, "Routine", 4.5, acc, "Túi", false, 2, free, new String[]{"Be", "Đen"}, 15));
@@ -190,17 +276,26 @@ public final class MockDataSource {
         return PRODUCTS;
     }
 
-    private static Category category(String id, String name, String code) {
+    private static Category category(String id, String name, String code, String... typeNames) {
         JsonObject json = new JsonObject();
         json.addProperty("id", id);
         json.addProperty("name", name);
         json.addProperty("code", code);
         json.addProperty("description", name);
+        JsonArray types = new JsonArray();
+        for (String typeName : typeNames) {
+            JsonObject type = new JsonObject();
+            type.addProperty("id", id + "-" + typeName);
+            type.addProperty("name", typeName);
+            types.add(type);
+        }
+        json.add("categoryTypes", types);
         return GSON.fromJson(json, Category.class);
     }
 
     /**
-     * @param baseStock 0 = hết hàng toàn bộ; lớn hơn 0 = tồn kho cơ bản (một số biến thể sẽ hết hàng để thử chip bị mờ).
+     * Tạo một sản phẩm giả từ các thông tin cơ bản.
+     * baseStock = 0: hết hàng toàn bộ; lớn hơn 0: tồn kho cơ bản (cứ 4 biến thể có 1 cái hết hàng để thử chip bị mờ).
      */
     private static Product product(String id, String name, String description, double price, String brand,
                                    Double rating, Category category, String typeName, boolean isNew,
@@ -219,6 +314,7 @@ public final class MockDataSource {
         json.addProperty("slug", id);
         json.addProperty("newArrival", isNew);
 
+        // Ảnh giả lấy từ placehold.co, ảnh đầu tiên là ảnh chính
         JsonArray resources = new JsonArray();
         String text = normalize(name).replace(' ', '+');
         for (int i = 0; i < imageCount; i++) {
@@ -235,6 +331,7 @@ public final class MockDataSource {
             json.addProperty("thumbnail", IMAGE_URL + text + "+1");
         }
 
+        // Mỗi cặp (size, màu) là một biến thể
         JsonArray variants = new JsonArray();
         int index = 0;
         for (String size : sizes) {
@@ -243,8 +340,10 @@ public final class MockDataSource {
                 v.addProperty("id", id + "-v-" + index);
                 v.addProperty("size", size);
                 v.addProperty("color", color);
-                // Cứ 4 biến thể thì 1 cái hết hàng để thử chip bị mờ
-                int stock = baseStock == 0 ? 0 : (index % 4 == 3 ? 0 : baseStock + (index * 3) % 7);
+                int stock = 0;
+                if (baseStock > 0 && index % 4 != 3) {
+                    stock = baseStock + (index * 3) % 7;
+                }
                 v.addProperty("stockQuantity", stock);
                 variants.add(v);
                 index++;

@@ -8,8 +8,10 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,22 +19,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ecommerce.R;
 import com.example.ecommerce.databinding.FragmentHomeBinding;
+import com.example.ecommerce.model.CartItem;
 import com.example.ecommerce.model.Product;
+import com.example.ecommerce.model.User;
 import com.example.ecommerce.ui.product.ProductAdapter;
 import com.example.ecommerce.util.Constants;
 import com.example.ecommerce.util.Resource;
+import com.example.ecommerce.util.SessionManager;
+import com.example.ecommerce.viewmodel.CartViewModel;
 import com.example.ecommerce.viewmodel.ProductListViewModel;
 
 import java.util.List;
 
 /**
- * Trang chủ / danh sách sản phẩm: header, tìm kiếm, chip danh mục, banner, lưới sản phẩm.
+ * Trang chủ: lời chào, ô tìm kiếm, chip danh mục, banner và lưới sản phẩm.
  * Fragment chỉ hiển thị; việc tải dữ liệu nằm ở ProductListViewModel.
  */
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private ProductListViewModel viewModel;
+    private CartViewModel cartViewModel;
     private ProductAdapter productAdapter;
     private CategoryAdapter categoryAdapter;
 
@@ -47,26 +54,52 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ProductListViewModel.class);
+        cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
+        viewModel.start(null, null); // tải danh sách lần đầu, không lọc
 
         setupLists();
         setupHeader();
 
         binding.swipeRefresh.setOnRefreshListener(viewModel::refresh);
-        binding.scroll.setOnScrollChangeListener((androidx.core.widget.NestedScrollView.OnScrollChangeListener)
-                (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                    View content = v.getChildAt(0);
-                    boolean nearBottom = content != null
-                            && content.getMeasuredHeight() - v.getMeasuredHeight() - scrollY < 400;
-                    if (scrollY > oldScrollY && nearBottom) {
-                        viewModel.loadMore();
-                    }
-                });
+
+        // Cuộn gần tới cuối thì tải thêm sản phẩm
+        binding.scroll.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                View content = v.getChildAt(0);
+                boolean nearBottom = content != null
+                        && content.getMeasuredHeight() - v.getMeasuredHeight() - scrollY < 400;
+                if (scrollY > oldScrollY && nearBottom) {
+                    viewModel.loadMore();
+                }
+            }
+        });
 
         viewModel.getProducts().observe(getViewLifecycleOwner(), this::render);
         viewModel.getCategories().observe(getViewLifecycleOwner(),
-                list -> categoryAdapter.submit(list, viewModel.getCategoryId()));
+                list -> categoryAdapter.submit(list, viewModel.getFilter().categoryId));
         viewModel.getLoadingMore().observe(getViewLifecycleOwner(),
                 loading -> binding.loadMoreProgress.setVisibility(loading ? View.VISIBLE : View.GONE));
+
+        // Số sản phẩm trong giỏ hiện trên biểu tượng giỏ hàng
+        cartViewModel.getCart().observe(getViewLifecycleOwner(), result -> {
+            if (result != null && result.status == Resource.Status.SUCCESS) {
+                updateCartBadge(result.data);
+            }
+        });
+    }
+
+    /** Mỗi lần quay lại Trang chủ: cập nhật tên người dùng và số lượng giỏ hàng. */
+    @Override
+    public void onResume() {
+        super.onResume();
+        User user = SessionManager.getUser();
+        binding.userName.setText(user == null ? getString(R.string.guest_name) : user.getFullName());
+        if (SessionManager.isLoggedIn()) {
+            cartViewModel.reloadQuietly();
+        } else {
+            binding.cartButton.setCount(0);
+        }
     }
 
     private void setupLists() {
@@ -81,12 +114,20 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupHeader() {
-        binding.searchHeader.setOnQueryChangeListener(viewModel::setKeyword);
+        NavController navController = NavHostFragment.findNavController(this);
+
+        // Bấm vào ô tìm kiếm hoặc nút lọc: mở màn Tìm kiếm
+        binding.searchHeader.setAsButton(v -> navController.navigate(R.id.searchFragment));
         binding.searchHeader.setOnFilterClickListener(v -> showSortMenu());
-        binding.cartButton.setOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigate(R.id.cartFragment));
+
+        binding.cartButton.setOnClickListener(v -> navController.navigate(R.id.cartFragment));
+        binding.seeAllCategories.setOnClickListener(v -> navController.navigate(R.id.categoryFragment));
         binding.banner.bannerButton.setOnClickListener(v ->
                 binding.scroll.smoothScrollTo(0, binding.sectionTitle.getTop()));
+    }
+
+    private void updateCartBadge(List<CartItem> items) {
+        binding.cartButton.setCount(items == null ? 0 : items.size());
     }
 
     private void render(Resource<List<Product>> resource) {
@@ -117,6 +158,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /** Menu nhỏ để đổi cách sắp xếp danh sách. */
     private void showSortMenu() {
         PopupMenu popup = new PopupMenu(requireContext(), binding.searchHeader.getFilterButton());
         popup.getMenuInflater().inflate(R.menu.menu_sort, popup.getMenu());
@@ -139,7 +181,7 @@ public class HomeFragment extends Fragment {
     private void openDetail(Product product) {
         Bundle args = new Bundle();
         args.putString(Constants.ARG_PRODUCT_ID, product.getId());
-        NavHostFragment.findNavController(this).navigate(R.id.action_home_to_detail, args);
+        NavHostFragment.findNavController(this).navigate(R.id.productDetailFragment, args);
     }
 
     @Override

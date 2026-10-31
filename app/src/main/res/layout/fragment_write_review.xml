@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.example.ecommerce.ui.common.AppToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="8dp"
+        app:title="Đánh giá sản phẩm" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="24dp">
+
+            <!-- Sản phẩm đang được đánh giá -->
+            <com.example.ecommerce.ui.common.LineItemView
+                android:id="@+id/product_line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_card"
+                android:padding="12dp" />
+
+            <TextView
+                style="@style/TextAppearance.App.Heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="Bạn thấy sản phẩm này thế nào?" />
+
+            <com.example.ecommerce.ui.common.StarRatingView
+                android:id="@+id/rating_stars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:id="@+id/rating_label"
+                style="@style/TextAppearance.App.BodySecondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Chạm vào sao để chọn" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:hint="Nhận xét (không bắt buộc)">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/comment_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="4" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/error_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_error_box"
+                android:padding="12dp"
+                android:textColor="@color/danger"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <com.example.ecommerce.ui.common.LoadingButton
+                android:id="@+id/submit_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Gửi đánh giá" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -222,6 +222,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:lineSpacingExtra="3dp" />
+
+            <!-- Mở danh sách đánh giá của sản phẩm -->
+            <TextView
+                android:id="@+id/reviews_row"
+                style="@style/TextAppearance.App.Heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_card"
+                android:drawableEnd="@drawable/ic_chevron_right"
+                android:drawableTint="@color/text_secondary"
+                android:padding="16dp"
+                android:text="Xem đánh giá sản phẩm" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

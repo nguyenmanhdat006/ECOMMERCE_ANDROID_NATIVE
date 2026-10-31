@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.example.ecommerce.ui.common.AppToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="8dp"
+        app:title="Xác thực email" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="16dp">
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_avatar"
+            android:importantForAccessibility="no"
+            android:padding="14dp"
+            android:src="@drawable/ic_mail"
+            android:tint="@color/primary" />
+
+        <TextView
+            android:id="@+id/verify_hint"
+            style="@style/TextAppearance.App.BodySecondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center" />
+
+        <!-- Ô nhập mã 6 số: một ô duy nhất, chữ cách đều cho dễ nhìn -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:hint="Mã xác thực 6 số">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/code_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:inputType="number"
+                android:letterSpacing="0.4"
+                android:maxLength="6"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_error_box"
+            android:padding="12dp"
+            android:textColor="@color/danger"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <com.example.ecommerce.ui.common.LoadingButton
+            android:id="@+id/verify_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Xác nhận" />
+
+        <!-- Chỉ hiện khi đang dùng dữ liệu giả -->
+        <TextView
+            android:id="@+id/mock_hint"
+            style="@style/TextAppearance.App.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card"
+            android:padding="12dp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

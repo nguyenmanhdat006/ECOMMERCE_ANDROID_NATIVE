@@ -65,6 +65,21 @@
         <item name="boxStrokeErrorColor">@color/danger</item>
     </style>
 
+    <!-- Dòng menu có biểu tượng bên trái và mũi tên bên phải (màn Tài khoản) -->
+    <style name="Widget.App.MenuRow" parent="TextAppearance.App.Body">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:drawableEnd">@drawable/ic_chevron_right</item>
+        <item name="android:drawableTint">@color/text_secondary</item>
+        <item name="android:drawablePadding">14dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
     <!-- Bo góc cho ảnh -->
     <style name="ShapeAppearance.App.Rounded12" parent="">
         <item name="cornerFamily">rounded</item>
