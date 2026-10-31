@@ -12,20 +12,25 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.ecommerce.R;
 import com.example.ecommerce.databinding.FragmentProductDetailBinding;
 import com.example.ecommerce.model.Product;
+import com.example.ecommerce.util.AuthGuard;
+import com.example.ecommerce.util.CheckoutSession;
 import com.example.ecommerce.util.Constants;
 import com.example.ecommerce.util.FavoriteStore;
 import com.example.ecommerce.util.Formatters;
 import com.example.ecommerce.util.Resource;
+import com.example.ecommerce.viewmodel.CartViewModel;
 import com.example.ecommerce.viewmodel.ProductDetailViewModel;
 import com.example.ecommerce.viewmodel.ProductDetailViewModel.Selection;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +41,7 @@ public class ProductDetailFragment extends Fragment {
 
     private FragmentProductDetailBinding binding;
     private ProductDetailViewModel viewModel;
+    private CartViewModel cartViewModel;
     private final ImageSliderAdapter sliderAdapter = new ImageSliderAdapter();
     private Product product;
 
@@ -50,6 +56,7 @@ public class ProductDetailFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ProductDetailViewModel.class);
+        cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
         viewModel.load(requireArguments().getString(Constants.ARG_PRODUCT_ID));
 
         binding.imagePager.setAdapter(sliderAdapter);
@@ -59,8 +66,17 @@ public class ProductDetailFragment extends Fragment {
         binding.toolbar.setAction(2, R.drawable.ic_share, getString(R.string.share_product), v -> shareProduct());
 
         binding.bottomBar.setLabel(getString(R.string.subtotal));
-        binding.bottomBar.setPrimaryButton(getString(R.string.buy_now), v -> onAction());
-        binding.bottomBar.setSecondaryIconButton(R.drawable.ic_cart, getString(R.string.add_to_cart), v -> onAction());
+        binding.bottomBar.setPrimaryButton(getString(R.string.buy_now), v -> buyNow());
+        binding.bottomBar.setSecondaryIconButton(R.drawable.ic_cart, getString(R.string.add_to_cart), v -> addToCart());
+        binding.reviewsRow.setOnClickListener(v -> openReviews());
+
+        // Thông báo kết quả thêm giỏ hàng ("Đã thêm vào giỏ hàng" hoặc lỗi vượt tồn kho)
+        cartViewModel.getMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                cartViewModel.clearMessage();
+            }
+        });
 
         binding.quantityStepper.setOnQuantityChangeListener(viewModel::setQuantity);
 
@@ -178,15 +194,51 @@ public class ProductDetailFragment extends Fragment {
         group.addView(chip);
     }
 
-    /** Mua ngay / Thêm vào giỏ: cần chọn đủ size và màu. Giỏ hàng và đặt hàng sẽ làm ở bước sau. */
-    private void onAction() {
+    /** Lấy lựa chọn hiện tại; nếu chưa chọn đủ size và màu thì báo và trả về null. */
+    private Selection requireVariantSelected() {
         Selection s = viewModel.getSelection().getValue();
         if (s == null || s.variant == null) {
             Toast.makeText(requireContext(), R.string.pick_variant, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        return s;
+    }
+
+    /** Nút giỏ hàng: thêm sản phẩm đã chọn vào giỏ (cần đăng nhập). */
+    private void addToCart() {
+        Selection s = requireVariantSelected();
+        if (s == null || !AuthGuard.requireLogin(this)) {
             return;
         }
-        // TODO: gọi API giỏ hàng (POST /api/carts) khi làm module Giỏ hàng; hiện chỉ thông báo.
-        Toast.makeText(requireContext(), R.string.feature_coming, Toast.LENGTH_SHORT).show();
+        cartViewModel.addToCart(s.variant.getId(), s.quantity);
+    }
+
+    /** Nút Mua ngay: bỏ qua giỏ hàng, sang thẳng màn Thanh toán với sản phẩm đã chọn. */
+    private void buyNow() {
+        Selection s = requireVariantSelected();
+        if (s == null || !AuthGuard.requireLogin(this)) {
+            return;
+        }
+        CheckoutSession.Item item = new CheckoutSession.Item();
+        item.variantId = s.variant.getId();
+        item.productName = product.getName();
+        item.imageUrl = product.getCoverUrl();
+        item.variantText = s.size + ", " + s.color;
+        item.price = product.getPrice();
+        item.quantity = s.quantity;
+        item.cartItemId = null; // không đi qua giỏ hàng
+
+        List<CheckoutSession.Item> items = new ArrayList<>();
+        items.add(item);
+        CheckoutSession.setItems(items);
+        NavHostFragment.findNavController(this).navigate(R.id.checkoutFragment);
+    }
+
+    private void openReviews() {
+        Bundle args = new Bundle();
+        args.putString(Constants.ARG_PRODUCT_ID, product.getId());
+        args.putString(Constants.ARG_PRODUCT_NAME, product.getName());
+        NavHostFragment.findNavController(this).navigate(R.id.reviewListFragment, args);
     }
 
     private void toggleFavorite() {

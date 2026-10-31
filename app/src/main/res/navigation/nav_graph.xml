@@ -1,39 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sơ đồ điều hướng: liệt kê mọi màn hình (Fragment) của app.
+    Chuyển màn hình trong code:
+        NavHostFragment.findNavController(this).navigate(R.id.tenManHinh, bundleDuLieu);
+    Dữ liệu truyền sang nằm trong Bundle; khóa dữ liệu khai báo ở util/Constants.java.
+-->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
-    <!-- 4 tab của thanh điều hướng dưới. id phải trùng với id trong menu/bottom_nav_menu.xml -->
+    <!-- 4 tab của thanh điều hướng dưới (id phải trùng id trong menu/bottom_nav_menu.xml) -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.ecommerce.ui.home.HomeFragment"
-        android:label="@string/tab_home">
-        <action
-            android:id="@+id/action_home_to_detail"
-            app:destination="@id/productDetailFragment" />
-    </fragment>
-
-    <!-- Các tab chưa làm dùng chung một màn hình tạm; thay bằng Fragment thật khi làm tới -->
+        android:label="Trang chủ" />
     <fragment
         android:id="@+id/cartFragment"
-        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
-        android:label="@string/tab_cart" />
+        android:name="com.example.ecommerce.ui.cart.CartFragment"
+        android:label="Giỏ hàng" />
     <fragment
         android:id="@+id/ordersFragment"
-        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
-        android:label="@string/tab_orders" />
+        android:name="com.example.ecommerce.ui.order.OrderListFragment"
+        android:label="Đơn hàng" />
     <fragment
         android:id="@+id/accountFragment"
-        android:name="com.example.ecommerce.ui.placeholder.PlaceholderFragment"
-        android:label="@string/tab_account" />
+        android:name="com.example.ecommerce.ui.account.AccountFragment"
+        android:label="Tài khoản" />
 
+    <!-- Sản phẩm -->
     <fragment
         android:id="@+id/productDetailFragment"
         android:name="com.example.ecommerce.ui.product.ProductDetailFragment"
-        android:label="@string/product_details">
+        android:label="Chi tiết sản phẩm">
         <argument
             android:name="productId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/categoryFragment"
+        android:name="com.example.ecommerce.ui.category.CategoryFragment"
+        android:label="Danh mục" />
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.ecommerce.ui.search.SearchFragment"
+        android:label="Tìm kiếm" />
+    <fragment
+        android:id="@+id/reviewListFragment"
+        android:name="com.example.ecommerce.ui.review.ReviewListFragment"
+        android:label="Đánh giá sản phẩm" />
+    <fragment
+        android:id="@+id/writeReviewFragment"
+        android:name="com.example.ecommerce.ui.review.WriteReviewFragment"
+        android:label="Viết đánh giá" />
+
+    <!-- Đăng nhập, đăng ký -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.ecommerce.ui.auth.LoginFragment"
+        android:label="Đăng nhập" />
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.ecommerce.ui.auth.RegisterFragment"
+        android:label="Đăng ký" />
+    <fragment
+        android:id="@+id/verifyFragment"
+        android:name="com.example.ecommerce.ui.auth.VerifyFragment"
+        android:label="Xác thực email" />
+
+    <!-- Mua hàng -->
+    <fragment
+        android:id="@+id/checkoutFragment"
+        android:name="com.example.ecommerce.ui.checkout.CheckoutFragment"
+        android:label="Thanh toán" />
+    <fragment
+        android:id="@+id/orderResultFragment"
+        android:name="com.example.ecommerce.ui.checkout.OrderResultFragment"
+        android:label="Kết quả đặt hàng" />
+    <fragment
+        android:id="@+id/addressListFragment"
+        android:name="com.example.ecommerce.ui.address.AddressListFragment"
+        android:label="Địa chỉ của tôi" />
+    <fragment
+        android:id="@+id/addressFormFragment"
+        android:name="com.example.ecommerce.ui.address.AddressFormFragment"
+        android:label="Địa chỉ" />
+
+    <!-- Đơn hàng và tài khoản -->
+    <fragment
+        android:id="@+id/orderDetailFragment"
+        android:name="com.example.ecommerce.ui.order.OrderDetailFragment"
+        android:label="Chi tiết đơn hàng" />
+    <fragment
+        android:id="@+id/unreviewedFragment"
+        android:name="com.example.ecommerce.ui.order.UnreviewedFragment"
+        android:label="Chờ đánh giá" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.ecommerce.ui.account.SettingsFragment"
+        android:label="Cài đặt" />
 </navigation>

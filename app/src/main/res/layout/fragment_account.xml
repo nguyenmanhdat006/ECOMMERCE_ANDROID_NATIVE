@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.example.ecommerce.ui.common.AppToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="12dp"
+        app:showBack="false"
+        app:title="Tài khoản" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Nội dung khi đã đăng nhập -->
+        <ScrollView
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/screen_padding"
+                android:paddingBottom="24dp">
+
+                <!-- Thông tin người dùng -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/avatar_text"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_avatar"
+                        android:gravity="center"
+                        android:textColor="@color/primary"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/user_name"
+                            style="@style/TextAppearance.App.Title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/user_email"
+                            style="@style/TextAppearance.App.BodySecondary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp" />
+
+                        <TextView
+                            android:id="@+id/user_phone"
+                            style="@style/TextAppearance.App.BodySecondary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Menu -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/menu_orders"
+                        style="@style/Widget.App.MenuRow"
+                        android:drawableStart="@drawable/ic_orders"
+                        android:text="Đơn hàng của tôi" />
+
+                    <TextView
+                        android:id="@+id/menu_unreviewed"
+                        style="@style/Widget.App.MenuRow"
+                        android:drawableStart="@drawable/ic_star"
+                        android:text="Chờ đánh giá" />
+
+                    <TextView
+                        android:id="@+id/menu_addresses"
+                        style="@style/Widget.App.MenuRow"
+                        android:drawableStart="@drawable/ic_location"
+                        android:text="Địa chỉ của tôi" />
+
+                    <TextView
+                        android:id="@+id/menu_settings"
+                        style="@style/Widget.App.MenuRow"
+                        android:drawableStart="@drawable/ic_settings"
+                        android:text="Cài đặt" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Lời nhắc đăng nhập khi chưa có tài khoản -->
+        <com.example.ecommerce.ui.common.LoginPromptView
+            android:id="@+id/login_prompt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

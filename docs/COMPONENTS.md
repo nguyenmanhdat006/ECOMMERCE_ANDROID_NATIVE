@@ -1,53 +1,73 @@
-# Component dùng chung (Java + XML, không dùng DI)
+# Hướng dẫn dự án Android (Java + XML, MVVM, không dùng DI)
 
-Tất cả nằm trong `app/src/main/java/com/example/ecommerce/ui/common/` (mỗi cái kèm một layout `view_*.xml`),
-trừ C1 (tài nguyên) và C7 (`ui/product/ProductAdapter`).
+## 1. Chạy app
+
+- Mở thư mục `Ecommerce_android` bằng Android Studio, bấm **Sync Project with Gradle Files**, chọn emulator rồi Run.
+- Mặc định app dùng **dữ liệu giả** (không cần backend): cờ `USE_MOCK_DATA = true` trong `app/build.gradle.kts`.
+  - Tài khoản thử: `lan@example.com` / `Test@12345`. Đăng ký tài khoản mới thì mã xác thực là `123456`.
+  - Dữ liệu giả nằm trong bộ nhớ, tắt app là mất (giỏ hàng, đơn hàng, đánh giá mới tạo).
+- Chạy với backend thật: bật Spring Boot ở cổng 8080, đổi `USE_MOCK_DATA` thành `false`, Sync lại.
+  Emulator gọi máy tính qua `10.0.2.2` (`BASE_URL`). Máy thật: đổi `BASE_URL` sang IP máy tính.
+- Xem các trạng thái giao diện khác khi dùng dữ liệu giả: đặt `MockDataSource.scenario` thành `EMPTY`, `ERROR` hoặc `SLOW`.
+
+## 2. Cấu trúc thư mục (`app/src/main/java/com/example/ecommerce`)
+
+| Thư mục | Vai trò |
+| --- | --- |
+| `model/` | Lớp dữ liệu khớp JSON của backend (Product, Order, Address...) |
+| `service/` | `ApiService` (danh sách API), `RetrofitClient` (tạo Retrofit, tự gắn token) |
+| `repository/` | Lấy dữ liệu: gọi API hoặc dữ liệu giả (`MockDataSource`, `MockStore`) |
+| `viewmodel/` | Giữ trạng thái và logic của từng màn hình |
+| `ui/` | Các màn hình (Fragment), adapter và component dùng chung (`ui/common`) |
+| `util/` | Hàm tiện ích: định dạng, lưu phiên đăng nhập, hằng số |
+
+Luồng dữ liệu: `Fragment` → `ViewModel` → `Repository` → `ApiService` (hoặc dữ liệu giả) → backend.
+Không dùng DI: ViewModel tự `new` repository, Retrofit là singleton trong `RetrofitClient`.
+
+## 3. Các màn hình (`ui/`) và API liên quan
+
+| Nhóm | Màn hình | API |
+| --- | --- | --- |
+| auth | Đăng nhập, Đăng ký, Xác thực email | `/api/auth/login`, `/register`, `/verify` |
+| home | Trang chủ | `/api/products/search`, `/api/category` |
+| category | Danh mục | `/api/category` |
+| search | Tìm kiếm + bảng Lọc | `/api/products/search` (keyword, giá, thương hiệu, đánh giá, hàng mới, sắp xếp) |
+| product | Chi tiết sản phẩm (chọn size, màu, số lượng) | `/api/products/{id}`, `/api/carts` |
+| review | Danh sách đánh giá, Viết hoặc sửa đánh giá | `/api/reviews` |
+| cart | Giỏ hàng | `/api/carts` |
+| checkout | Thanh toán (COD), Kết quả đặt hàng | `/api/orders` |
+| address | Danh sách địa chỉ, Thêm hoặc sửa địa chỉ | `/api/addresses` |
+| order | Danh sách đơn, Chi tiết đơn, Chờ đánh giá | `/api/orders/me`, `/{id}`, `/unreviewed` |
+| account | Tài khoản, Cài đặt (đăng xuất) | lưu cục bộ (`SessionManager`) |
+
+Chưa có theo API hiện tại: hủy đơn của khách, gửi lại mã xác thực, sửa hồ sơ, quên mật khẩu, thanh toán VNPAY (đã bỏ).
+
+## 4. Component dùng chung (`ui/common`)
 
 | Mã | Component | Cách dùng nhanh |
 | --- | --- | --- |
-| C1 | Theme, màu, font, style | `res/values/colors.xml, themes.xml, styles.xml, dimens.xml`; chữ dùng `TextAppearance.App.*`, nút dùng `Widget.App.Button.*` |
+| C1 | Theme, màu, font, style | `res/values/colors.xml, themes.xml, styles.xml`; chữ dùng `TextAppearance.App.*`, nút dùng `Widget.App.Button.*` |
 | C2 | `AppToolbar` | `<AppToolbar app:title="..." app:showBack="true"/>`; `setAction(1, icon, mô tả, listener)` |
-| C3 | `SearchHeader`, `CartButton` | `setOnQueryChangeListener(q -> ...)` (đã debounce 400 ms), `CartButton.setCount(n)` |
-| C4 | Khung + thanh điều hướng dưới | `MainActivity`, `navigation/nav_graph.xml`, `menu/bottom_nav_menu.xml`. Id tab phải trùng id màn hình trong nav_graph |
-| C5 | `StateView` | `showLoading()`, `showEmpty("...")`, `showError("...", retryListener)`, `hide()` |
-| C6 | `LoadingButton`, style ô nhập | `setLoading(true)` khi gọi API; ô nhập dùng `Widget.App.TextInput` với `TextInputLayout` |
+| C3 | `SearchHeader`, `CartButton` | `setOnQueryChangeListener(q -> ...)` (debounce 400 ms); `setAsButton(...)`; `CartButton.setCount(n)` |
+| C4 | Khung + thanh điều hướng dưới | `MainActivity`, `navigation/nav_graph.xml`, `menu/bottom_nav_menu.xml` |
+| C5 | `StateView` | `showLoading()`, `showEmpty("...")`, `showError("...", retry)`, `hide()` |
+| C6 | `LoadingButton`, style ô nhập | `setLoading(true)` khi gọi API; ô nhập dùng `Widget.App.TextInput` |
 | C7 | `ProductAdapter` (thẻ sản phẩm) | `new ProductAdapter(product -> ...)`, `submitList(list)` |
-| C8 | `LineItemView` | `bind(imageUrl, tên, phân loại, giá)`; `getEndContainer()` để gắn `QuantityStepper` hoặc nút xóa |
-| C9 | `QuantityStepper` | `setMax(n)`, `setQuantity(n)`, `setOnQuantityChangeListener(q -> ...)` |
-| C10 | `BottomActionBar` | `setLabel`, `setPrice`, `setPrimaryButton(text, listener)`, `setSecondaryIconButton(...)` |
+| C8 | `LineItemView` | `bind(ảnh, tên, phân loại, giá)` |
+| C9 | `QuantityStepper` | `setMax(n)`, `setQuantity(n)`, `setOnQuantityChangeListener(...)` |
+| C10 | `BottomActionBar` | `setLabel`, `setPrice`, `setPrimaryButton(text, listener)` |
 | C11 | `AddressCardView` | `bind(tên, sđt, địa chỉ, đangChọn)` |
-| C12 | `StarRatingView`, `ReviewItemView` | `setRating(4.6f)`; `setEditable(true, rating -> ...)` khi viết đánh giá; `ReviewItemView.bind(...)` |
-| C13 | `OrderStatusView` | `setStatus("PENDING")` (PENDING, SHIPPING, WAIT_DELIVER, PAID, CANCELED, REFUND) |
+| C12 | `StarRatingView`, `ReviewItemView` | `setRating(4.6f)`; `setEditable(true, ...)`; `ReviewItemView.bind(...)` |
+| C13 | `OrderStatusView` | `setStatus("PENDING")` |
 | C14 | `ConfirmDialog` | `ConfirmDialog.show(ctx, tiêu đề, nội dung, "Xóa", true, () -> ...)` |
+| – | `LoginPromptView` | Lời nhắc đăng nhập cho tab cần tài khoản |
 
-## Luồng dữ liệu (MVVM, không DI)
+## 5. Quy ước khi viết thêm
 
-`Fragment` -> `ViewModel` (tự `new ProductRepository()`) -> `Repository` -> `RetrofitClient.getApiService()` -> backend.
-
-- Thêm API: khai báo trong `service/ApiService.java`, bọc trong một Repository, gọi từ ViewModel qua `RepositoryCallback`.
-- ViewModel tạo bằng `new ViewModelProvider(this).get(X.class)` (constructor không tham số).
-- Khi làm đăng nhập: thêm interceptor gắn `Authorization: Bearer <token>` trong `RetrofitClient`.
-
-## Thêm một màn hình mới
-
-1. Tạo `fragment_xxx.xml` và `XxxFragment.java` (dùng ViewBinding: `FragmentXxxBinding`).
-2. Khai báo `<fragment>` trong `navigation/nav_graph.xml`; chuyển màn bằng `NavHostFragment.findNavController(this).navigate(R.id...., bundle)`.
-3. Tab chính: thay `android:name` của tab đang dùng `PlaceholderFragment` bằng Fragment thật.
-
-## Dữ liệu giả (mock) khi backend chưa chạy
-
-- Cờ `USE_MOCK_DATA` trong `app/build.gradle.kts` (mặc định `true`): bật thì app dùng dữ liệu giả, không cần backend.
-  Chuyển sang backend thật: đổi thành `false`, rồi Sync Project.
-- Dữ liệu nằm ở `repository/MockDataSource.java` (14 sản phẩm, 3 danh mục). Có đủ trường hợp để kiểm tra giao diện:
-  còn hàng, hết hàng, không ảnh, không đánh giá, không mô tả, tên rất dài, nhiều size và màu (có biến thể hết hàng), hàng mới.
-  Tìm kiếm, lọc danh mục, sắp xếp và phân trang chạy trên dữ liệu giả giống backend.
-- Xem các trạng thái khác của giao diện: đặt `MockDataSource.scenario` thành `EMPTY` (rỗng), `ERROR` (lỗi + nút Thử lại)
-  hoặc `SLOW` (đang tải 3 giây); mặc định là `NORMAL`.
-- Thêm sản phẩm giả mới: thêm một dòng `PRODUCTS.add(product(...))` trong `MockDataSource.products()`.
-- Khi thêm API mới (giỏ hàng, đơn hàng...): thêm hàm mock tương ứng trong `MockDataSource` và rẽ nhánh theo
-  `Constants.USE_MOCK_DATA` trong Repository, giống `ProductRepository`.
-
-## Chạy app
-
-Backend chạy ở cổng 8080; emulator gọi qua `10.0.2.2` (`BASE_URL` trong `app/build.gradle.kts`).
-Máy thật: đổi `BASE_URL` sang IP máy tính. Ảnh có URL `localhost` được tự đổi sang host của `BASE_URL`.
+- **Thêm API mới:** khai báo trong `service/ApiService.java` → bọc trong Repository (kèm nhánh dữ liệu giả nếu muốn) → gọi từ ViewModel.
+- **Thêm màn hình:** tạo `fragment_xxx.xml` + `XxxFragment.java` (ViewBinding: `FragmentXxxBinding`), khai báo trong `nav_graph.xml`,
+  chuyển màn bằng `NavHostFragment.findNavController(this).navigate(R.id.xxxFragment, bundle)`. Khóa dữ liệu truyền sang để ở `util/Constants.java`.
+- **Màn hình cần đăng nhập:** `if (!AuthGuard.requireLogin(this)) return;`
+- **Kết quả một lần (đăng nhập, đặt hàng...):** sau khi xử lý xong gọi `clear...()` của ViewModel để không bị xử lý lại khi quay về màn hình.
+- Chữ hiển thị của các màn mới viết thẳng trong layout cho dễ đọc; muốn đa ngôn ngữ thì chuyển vào `strings.xml`.
+- Ảnh sản phẩm có URL `localhost` được tự đổi sang host của `BASE_URL` (`ImageUrls.fix`).

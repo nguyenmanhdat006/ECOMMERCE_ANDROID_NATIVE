@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/screen_padding"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <com.example.ecommerce.ui.common.ReviewItemView
+        android:id="@+id/review_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Chỉ hiện trên đánh giá của chính người dùng -->
+    <LinearLayout
+        android:id="@+id/own_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/edit_button"
+            style="@style/TextAppearance.App.Heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="6dp"
+            android:text="Sửa"
+            android:textColor="@color/primary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/delete_button"
+            style="@style/TextAppearance.App.Heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:padding="6dp"
+            android:text="Xóa"
+            android:textColor="@color/danger"
+            android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

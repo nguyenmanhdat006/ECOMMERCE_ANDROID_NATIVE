@@ -49,6 +49,11 @@ public class StateView extends FrameLayout {
         show(text, R.drawable.ic_search, null);
     }
 
+    /** Trạng thái rỗng với biểu tượng riêng (ví dụ icon giỏ hàng cho giỏ hàng trống). */
+    public void showEmpty(String text, int iconRes) {
+        show(text, iconRes, null);
+    }
+
     public void showError(String text, @Nullable OnClickListener onRetry) {
         show(text, R.drawable.ic_error, onRetry);
     }
