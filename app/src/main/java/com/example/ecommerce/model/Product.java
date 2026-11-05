@@ -44,6 +44,14 @@ public class Product {
         return productResources == null ? new ArrayList<>() : productResources;
     }
 
+    /**
+     * Có thông tin biến thể (và tồn kho) hay không.
+     * API tìm kiếm không trả danh sách biến thể; chỉ API chi tiết sản phẩm mới có.
+     */
+    public boolean hasStockInfo() {
+        return variants != null;
+    }
+
     /** Tổng tồn kho của mọi biến thể. */
     public int getTotalStock() {
         int total = 0;

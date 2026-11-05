@@ -2,6 +2,7 @@ package com.example.ecommerce.ui.product;
 
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -61,11 +62,16 @@ public class ProductAdapter extends ListAdapter<Product, ProductAdapter.ViewHold
             binding.productRating.setText(Formatters.rating(product.getRating()));
 
             int stock = product.getTotalStock();
-            if (stock > 0) {
+            if (!product.hasStockInfo()) {
+                // Danh sách từ API tìm kiếm không có tồn kho, nên ẩn dòng này
+                binding.productStock.setVisibility(View.GONE);
+            } else if (stock > 0) {
+                binding.productStock.setVisibility(View.VISIBLE);
                 binding.productStock.setText(
                         binding.getRoot().getContext().getString(R.string.stock_left, stock));
                 binding.productStock.setTextColor(ContextCompat.getColor(binding.getRoot().getContext(), R.color.danger));
             } else {
+                binding.productStock.setVisibility(View.VISIBLE);
                 binding.productStock.setText(R.string.out_of_stock);
                 binding.productStock.setTextColor(ContextCompat.getColor(binding.getRoot().getContext(), R.color.text_hint));
             }
