@@ -15,11 +15,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // 10.0.2.2 = máy host nhìn từ emulator; đổi sang IP máy tính khi chạy máy thật
+        // 10.0.2.2 = mÃ¡y host nhÃ¬n tá»« emulator; Ä‘á»•i sang IP mÃ¡y tÃ­nh khi cháº¡y mÃ¡y tháº­t
         buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
 
-        // true = dùng dữ liệu giả để dựng giao diện khi backend chưa chạy (xem repository/MockDataSource.java)
-        // false = gọi backend thật. Đổi xong bấm Sync Project.
+        // true = dÃ¹ng dá»¯ liá»‡u giáº£ Ä‘á»ƒ dá»±ng giao diá»‡n khi backend chÆ°a cháº¡y (xem repository/MockDataSource.java)
+        // false = gá»i backend tháº­t. Äá»•i xong báº¥m Sync Project.
         buildConfigField("boolean", "USE_MOCK_DATA", "true")
     }
 
