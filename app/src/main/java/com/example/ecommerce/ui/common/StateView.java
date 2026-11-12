@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import com.example.ecommerce.R;
@@ -22,7 +23,7 @@ public class StateView extends FrameLayout {
     private final View messageGroup;
     private final ImageView icon;
     private final TextView message;
-    private final View retryButton;
+    private final TextView retryButton;
 
     public StateView(Context context) {
         this(context, null);
@@ -55,7 +56,14 @@ public class StateView extends FrameLayout {
     }
 
     public void showError(String text, @Nullable OnClickListener onRetry) {
+        retryButton.setText(R.string.retry);
         show(text, R.drawable.ic_error, onRetry);
+    }
+
+    /** Trạng thái rỗng có biểu tượng riêng và một nút hành động ("Đi mua sắm"...). */
+    public void showAction(String text, @DrawableRes int iconRes, String actionText, OnClickListener onAction) {
+        retryButton.setText(actionText);
+        show(text, iconRes, onAction);
     }
 
     public void hide() {

@@ -120,10 +120,20 @@ public class HomeFragment extends Fragment {
         binding.searchHeader.setAsButton(v -> navController.navigate(R.id.searchFragment));
         binding.searchHeader.setOnFilterClickListener(v -> showSortMenu());
 
-        binding.cartButton.setOnClickListener(v -> navController.navigate(R.id.cartFragment));
+        binding.cartButton.setOnClickListener(v -> selectBottomTab(R.id.cartFragment));
         binding.seeAllCategories.setOnClickListener(v -> navController.navigate(R.id.categoryFragment));
         binding.banner.bannerButton.setOnClickListener(v ->
                 binding.scroll.smoothScrollTo(0, binding.sectionTitle.getTop()));
+    }
+
+    private void selectBottomTab(int tabId) {
+        if (getActivity() != null) {
+            com.google.android.material.bottomnavigation.BottomNavigationView nav =
+                    getActivity().findViewById(R.id.bottom_nav);
+            if (nav != null) {
+                nav.setSelectedItemId(tabId);
+            }
+        }
     }
 
     private void updateCartBadge(List<CartItem> items) {

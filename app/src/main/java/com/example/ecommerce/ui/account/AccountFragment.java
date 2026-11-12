@@ -35,7 +35,7 @@ public class AccountFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         final NavController navController = NavHostFragment.findNavController(this);
 
-        binding.menuOrders.setOnClickListener(v -> navController.navigate(R.id.ordersFragment));
+        binding.menuOrders.setOnClickListener(v -> selectBottomTab(R.id.ordersFragment));
         binding.menuUnreviewed.setOnClickListener(v -> navController.navigate(R.id.unreviewedFragment));
         binding.menuAddresses.setOnClickListener(v -> navController.navigate(R.id.addressListFragment));
         binding.menuSettings.setOnClickListener(v -> navController.navigate(R.id.settingsFragment));
@@ -63,6 +63,16 @@ public class AccountFragment extends Fragment {
         binding.userPhone.setText(user.phoneNumber == null ? "" : user.phoneNumber);
         // Ảnh đại diện tạm: chữ cái đầu của tên
         binding.avatarText.setText(name.substring(0, 1).toUpperCase(Locale.getDefault()));
+    }
+
+    private void selectBottomTab(int tabId) {
+        if (getActivity() != null) {
+            com.google.android.material.bottomnavigation.BottomNavigationView nav =
+                    getActivity().findViewById(R.id.bottom_nav);
+            if (nav != null) {
+                nav.setSelectedItemId(tabId);
+            }
+        }
     }
 
     @Override

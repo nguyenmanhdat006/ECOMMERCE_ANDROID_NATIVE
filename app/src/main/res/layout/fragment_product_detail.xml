@@ -4,16 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.ecommerce.ui.common.AppToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/screen_padding"
-        android:paddingVertical="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="0dp"
@@ -21,223 +11,267 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/screen_padding"
+            android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
+            <!-- 1. Ảnh trượt (nút back và giỏ nổi phía trên, nằm ngoài khối cuộn) -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
-                android:background="@drawable/bg_card">
+                android:layout_height="320dp"
+                android:background="@drawable/bg_image_card">
 
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/image_pager"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/image_dots"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:background="@android:color/transparent"
+                    app:tabBackground="@drawable/dot_indicator"
+                    app:tabGravity="center"
+                    app:tabIndicatorHeight="0dp"
+                    app:tabMinWidth="0dp"
+                    app:tabPaddingEnd="4dp"
+                    app:tabPaddingStart="4dp"
+                    app:tabRippleColor="@android:color/transparent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="12dp"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/share_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle_button"
+                        android:contentDescription="@string/share_product"
+                        android:padding="10dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_share"
+                        android:tint="@color/text_secondary" />
+
+                    <ImageButton
+                        android:id="@+id/favorite_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_circle_button"
+                        android:contentDescription="@string/favorite"
+                        android:padding="10dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_heart" />
+                </LinearLayout>
             </FrameLayout>
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/image_dots"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:background="@android:color/transparent"
-                app:tabBackground="@drawable/dot_indicator"
-                app:tabGravity="center"
-                app:tabIndicatorHeight="0dp"
-                app:tabMinWidth="0dp"
-                app:tabPaddingEnd="4dp"
-                app:tabPaddingStart="4dp"
-                app:tabRippleColor="@android:color/transparent" />
-
+            <!-- 2. Giá, tên, thương hiệu, điểm -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/category_tag"
+                    android:id="@+id/product_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_tag_blue"
+                    android:background="@drawable/bg_price_badge"
                     android:paddingHorizontal="14dp"
                     android:paddingVertical="6dp"
                     android:textColor="@color/white"
-                    android:textSize="12sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_star"
-                    android:tint="@color/star" />
 
                 <TextView
-                    android:id="@+id/product_rating"
-                    style="@style/TextAppearance.App.Body"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/product_name"
+                    style="@style/TextAppearance.App.Title"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="10dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/product_brand"
+                        style="@style/TextAppearance.App.BodySecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1" />
+
+                    <TextView
+                        android:id="@+id/brand_dot"
+                        style="@style/TextAppearance.App.BodySecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="8dp"
+                        android:text="·" />
+
+                    <ImageView
+                        android:id="@+id/rating_star"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_star"
+                        android:tint="@color/star" />
+
+                    <TextView
+                        android:id="@+id/product_rating"
+                        style="@style/TextAppearance.App.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/stock_text"
-                android:layout_width="wrap_content"
+            <!-- 3. Chọn phân loại: bấm mở bottom sheet -->
+            <LinearLayout
+                android:id="@+id/variant_row"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:textColor="@color/danger"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/product_name"
-                style="@style/TextAppearance.App.Title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:id="@+id/product_brand"
-                style="@style/TextAppearance.App.BodySecondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp" />
-
-            <TextView
-                android:id="@+id/product_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_price_badge"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/size_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TextAppearance.App.Heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/size_group"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:chipSpacingHorizontal="8dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/color_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TextAppearance.App.Heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/color" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/color_group"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:chipSpacingHorizontal="8dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_card"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minHeight="56dp"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp">
 
                 <TextView
-                    style="@style/TextAppearance.App.Heading"
+                    style="@style/TextAppearance.App.BodySecondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/variant_label" />
+
+                <TextView
+                    android:id="@+id/variant_value"
+                    style="@style/TextAppearance.App.Body"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:text="@string/quantity" />
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:textStyle="bold" />
 
-                <com.example.ecommerce.ui.common.QuantityStepper
-                    android:id="@+id/quantity_stepper"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_right"
+                    android:tint="@color/text_hint" />
             </LinearLayout>
 
-            <TextView
-                style="@style/TextAppearance.App.Heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/product_details"
-                android:textColor="@color/primary" />
-
+            <!-- 4. Mô tả: thu gọn 3 dòng, có "Xem thêm" -->
             <LinearLayout
-                android:id="@+id/details_container"
+                android:id="@+id/description_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-            <TextView
-                android:id="@+id/description_title"
-                style="@style/TextAppearance.App.Heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/product_description"
-                android:textColor="@color/primary" />
-
-            <TextView
-                android:id="@+id/description"
-                style="@style/TextAppearance.App.BodySecondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:lineSpacingExtra="3dp" />
-
-            <!-- Mở danh sách đánh giá của sản phẩm -->
-            <TextView
-                android:id="@+id/reviews_row"
-                style="@style/TextAppearance.App.Heading"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/bg_card"
-                android:drawableEnd="@drawable/ic_chevron_right"
-                android:drawableTint="@color/text_secondary"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    style="@style/TextAppearance.App.Heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/description" />
+
+                <TextView
+                    android:id="@+id/description"
+                    style="@style/TextAppearance.App.BodySecondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="3dp" />
+
+                <TextView
+                    android:id="@+id/description_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingVertical="4dp"
+                    android:text="@string/see_more"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- 5. Đánh giá nổi bật: 2 đánh giá đầu, ẩn khi chưa có -->
+            <LinearLayout
+                android:id="@+id/review_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical"
                 android:padding="16dp"
-                android:text="Xem đánh giá sản phẩm" />
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/review_title"
+                        style="@style/TextAppearance.App.Heading"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:id="@+id/review_see_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingVertical="4dp"
+                        android:text="@string/see_all"
+                        android:textColor="@color/primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/review_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- 7. Trạng thái: đang tải, lỗi + Thử lại, không tìm thấy -->
     <com.example.ecommerce.ui.common.StateView
         android:id="@+id/state_view"
         android:layout_width="0dp"
@@ -245,8 +279,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 6. Thanh hành động dưới: Thêm vào giỏ + Mua ngay -->
     <com.example.ecommerce.ui.common.BottomActionBar
         android:id="@+id/bottom_bar"
         android:layout_width="0dp"
@@ -254,4 +289,29 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Header trong suốt nổi trên ảnh: luôn hiện kể cả khi đang tải hoặc lỗi -->
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="@dimen/icon_button"
+        android:layout_height="@dimen/icon_button"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_circle_button"
+        android:contentDescription="@string/go_back"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back"
+        android:tint="@color/text_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.example.ecommerce.ui.common.CartButton
+        android:id="@+id/cart_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="28dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -54,6 +54,25 @@ public class CartViewModel extends ViewModel {
         repository.addToCart(variantId, quantity, new ActionCallback("Đã thêm vào giỏ hàng"));
     }
 
+    /**
+     * Thêm vào giỏ và báo kết quả cho nơi gọi (bottom sheet cần biết để đóng).
+     * Khác bản trên: không tự hiện thông báo, nơi gọi tự xử lý.
+     */
+    public void addToCart(String variantId, int quantity, RepositoryCallback<Void> callback) {
+        repository.addToCart(variantId, quantity, new RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                reloadQuietly();
+                callback.onSuccess(data);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                callback.onError(errorMessage);
+            }
+        });
+    }
+
     private void fetchCart() {
         repository.getCart(new RepositoryCallback<List<CartItem>>() {
             @Override

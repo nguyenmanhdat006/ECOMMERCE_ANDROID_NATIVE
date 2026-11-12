@@ -59,8 +59,8 @@ public class OrderResultFragment extends Fragment {
 
         binding.primaryButton.setText("Xem đơn hàng");
         binding.primaryButton.setOnClickListener(v -> {
-            navController.popBackStack(R.id.homeFragment, false); // về Trang chủ rồi mở tab Đơn hàng
-            navController.navigate(R.id.ordersFragment);
+            navController.popBackStack(R.id.homeFragment, false);
+            selectBottomTab(R.id.ordersFragment);
         });
         binding.secondaryButton.setText("Tiếp tục mua sắm");
         binding.secondaryButton.setOnClickListener(v -> navController.popBackStack(R.id.homeFragment, false));
@@ -86,8 +86,18 @@ public class OrderResultFragment extends Fragment {
         binding.secondaryButton.setText("Về giỏ hàng");
         binding.secondaryButton.setOnClickListener(v -> {
             navController.popBackStack(R.id.homeFragment, false);
-            navController.navigate(R.id.cartFragment);
+            selectBottomTab(R.id.cartFragment);
         });
+    }
+
+    private void selectBottomTab(int tabId) {
+        if (getActivity() != null) {
+            com.google.android.material.bottomnavigation.BottomNavigationView nav =
+                    getActivity().findViewById(R.id.bottom_nav);
+            if (nav != null) {
+                nav.setSelectedItemId(tabId);
+            }
+        }
     }
 
     private void setIcon(int iconRes, int colorRes) {

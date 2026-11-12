@@ -16,6 +16,21 @@ public class CartItem {
         return productVariant.getSize() + ", " + productVariant.getColor();
     }
 
+    /** Nhãn theo thiết kế giỏ hàng: màu trước, size sau, ví dụ "Trắng, M". */
+    public String getVariantLabel() {
+        if (productVariant == null) {
+            return "";
+        }
+        String color = productVariant.getColor();
+        String size = productVariant.getSize();
+        boolean hasColor = color != null && !color.isEmpty();
+        boolean hasSize = size != null && !size.isEmpty();
+        if (hasColor && hasSize) {
+            return color + ", " + size;
+        }
+        return hasColor ? color : (hasSize ? size : "");
+    }
+
     public double getLineTotal() {
         return product.getPrice() * quantity;
     }
