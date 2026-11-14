@@ -10,8 +10,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Lớp cha của các repository: chạy một yêu cầu Retrofit và trả kết quả về RepositoryCallback.
- * Lỗi được đổi sang câu tiếng Việt dễ hiểu để màn hình hiển thị luôn.
+ * Quản lý nền tảng thực thi các yêu cầu API HTTP với Retrofit và xử lý phản hồi Callback.
  */
 abstract class BaseRepository {
 
@@ -19,21 +18,17 @@ abstract class BaseRepository {
     private static final String ERROR_UNKNOWN = "Đã có lỗi xảy ra. Thử lại sau.";
     private static final String ERROR_SESSION = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
 
-    /** Gửi yêu cầu. Thất bại 401 sẽ báo "phiên đăng nhập hết hạn". */
+    /** Đưa yêu cầu HTTP vào hàng đợi xử lý bất đồng bộ. */
     protected <T> Call<T> enqueue(Call<T> call, RepositoryCallback<T> callback) {
         return enqueue(call, callback, ERROR_SESSION);
     }
 
-    /**
-     * Gửi yêu cầu, cho phép đặt câu báo lỗi riêng cho mã 401
-     * (ví dụ màn Đăng nhập: 401 nghĩa là "sai email hoặc mật khẩu").
-     */
+    /** Thực thi yêu cầu bất đồng bộ với tùy chỉnh thông điệp cho mã lỗi 401. */
     protected <T> Call<T> enqueue(Call<T> call, RepositoryCallback<T> callback, String message401) {
         call.enqueue(new Callback<T>() {
             @Override
             public void onResponse(Call<T> c, Response<T> response) {
                 if (response.isSuccessful()) {
-                    // Với Call<Void> thì body() là null, vẫn là thành công
                     callback.onSuccess(response.body());
                 } else {
                     callback.onError(messageForError(response, message401));
@@ -43,7 +38,7 @@ abstract class BaseRepository {
             @Override
             public void onFailure(Call<T> c, Throwable t) {
                 if (c.isCanceled()) {
-                    return; // yêu cầu đã bị hủy chủ động, không báo lỗi
+                    return;
                 }
                 callback.onError(t instanceof IOException ? ERROR_NETWORK : ERROR_UNKNOWN);
             }
@@ -51,35 +46,35 @@ abstract class BaseRepository {
         return call;
     }
 
-    /** Chọn câu báo lỗi theo mã HTTP mà máy chủ trả về. */
+    /** Chuyển đổi mã phản hồi HTTP sang thông báo giao diện. */
     private String messageForError(Response<?> response, String message401) {
-        int code = response.code();
-        if (code == 401) {
+        int statusCode = response.code();
+        if (statusCode == 401) {
             return message401;
         }
-        if (code == 403) {
+        if (statusCode == 403) {
             return "Bạn không có quyền thực hiện thao tác này.";
         }
-        if (code == 404) {
+        if (statusCode == 404) {
             return "Không tìm thấy dữ liệu.";
         }
-        if (code == 400 || code == 409) {
-            String serverMessage = readServerMessage(response);
-            return serverMessage != null ? serverMessage : "Dữ liệu không hợp lệ.";
+        if (statusCode == 400 || statusCode == 409) {
+            String errMsg = readServerMessage(response);
+            return errMsg != null ? errMsg : "Dữ liệu không hợp lệ.";
         }
-        return "Lỗi máy chủ (" + code + "). Thử lại sau.";
+        return "Lỗi máy chủ (" + statusCode + "). Thử lại sau.";
     }
 
-    /** Backend báo lỗi dạng { "message": "..." }; lấy câu đó ra nếu có. */
+    /** Đọc thông điệp chi tiết từ phía backend trả về. */
     private String readServerMessage(Response<?> response) {
         try {
-            String body = response.errorBody().string();
-            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-            if (json.has("message")) {
-                return json.get("message").getAsString();
+            String rawBody = response.errorBody().string();
+            JsonObject jsonObj = JsonParser.parseString(rawBody).getAsJsonObject();
+            if (jsonObj.has("message")) {
+                return jsonObj.get("message").getAsString();
             }
         } catch (Exception e) {
-            // Không đọc được nội dung lỗi thì dùng câu mặc định
+            // Sử dụng thông báo chuẩn khi không giải mã được nội dung
         }
         return null;
     }

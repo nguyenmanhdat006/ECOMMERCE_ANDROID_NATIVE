@@ -14,8 +14,7 @@ import androidx.annotation.Nullable;
 import com.example.ecommerce.R;
 
 /**
- * C5 - Trạng thái loading, rỗng, lỗi (kèm nút Thử lại). Đặt chồng lên vùng nội dung và gọi:
- * showLoading(), showEmpty("..."), showError("...", retryListener), hide().
+ * Thành phần hiển thị các trạng thái màn hình (Đang tải, Trống, Lỗi mạng).
  */
 public class StateView extends FrameLayout {
 
@@ -50,7 +49,6 @@ public class StateView extends FrameLayout {
         show(text, R.drawable.ic_search, null);
     }
 
-    /** Trạng thái rỗng với biểu tượng riêng (ví dụ icon giỏ hàng cho giỏ hàng trống). */
     public void showEmpty(String text, int iconRes) {
         show(text, iconRes, null);
     }
@@ -60,7 +58,6 @@ public class StateView extends FrameLayout {
         show(text, R.drawable.ic_error, onRetry);
     }
 
-    /** Trạng thái rỗng có biểu tượng riêng và một nút hành động ("Đi mua sắm"...). */
     public void showAction(String text, @DrawableRes int iconRes, String actionText, OnClickListener onAction) {
         retryButton.setText(actionText);
         show(text, iconRes, onAction);

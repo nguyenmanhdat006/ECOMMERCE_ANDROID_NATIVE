@@ -7,7 +7,9 @@ import com.example.ecommerce.util.Constants;
 
 import java.util.List;
 
-/** Đơn hàng của người đang đăng nhập (chỉ thanh toán khi nhận hàng COD). */
+/**
+ * Xử lý dữ liệu liên quan đến đơn hàng mua sắm.
+ */
 public class OrderRepository extends BaseRepository {
 
     private final ApiService api = Constants.USE_MOCK_DATA ? null : RetrofitClient.getApiService();
@@ -46,7 +48,7 @@ public class OrderRepository extends BaseRepository {
         enqueue(api.getOrder(orderId), callback);
     }
 
-    /** Các sản phẩm đã mua (đơn hoàn thành) mà chưa đánh giá. */
+    /** Lấy danh sách những sản phẩm đã mua chưa thực hiện đánh giá. */
     public void getUnreviewedItems(RepositoryCallback<List<Order.OrderItem>> callback) {
         if (Constants.USE_MOCK_DATA) {
             MockDataSource.success(callback, MockStore.getUnreviewedItems());

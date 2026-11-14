@@ -7,7 +7,9 @@ import com.example.ecommerce.util.Constants;
 
 import java.util.List;
 
-/** Đánh giá sản phẩm. */
+/**
+ * Xử lý dữ liệu đánh giá sản phẩm.
+ */
 public class ReviewRepository extends BaseRepository {
 
     private final ApiService api = Constants.USE_MOCK_DATA ? null : RetrofitClient.getApiService();
@@ -20,13 +22,13 @@ public class ReviewRepository extends BaseRepository {
         enqueue(api.getProductReviews(productId), callback);
     }
 
-    /** Viết đánh giá mới cho một dòng đơn hàng đã mua. */
+    /** Tạo bài đánh giá mới. */
     public void createReview(Review.Request request, RepositoryCallback<Review> callback) {
         if (Constants.USE_MOCK_DATA) {
-            String[] error = new String[1]; // nơi nhận câu báo lỗi (nếu có)
-            Review review = MockStore.createReview(request, error);
+            String[] errContainer = new String[1];
+            Review review = MockStore.createReview(request, errContainer);
             if (review == null) {
-                MockDataSource.error(callback, error[0]);
+                MockDataSource.error(callback, errContainer[0]);
             } else {
                 MockDataSource.success(callback, review);
             }

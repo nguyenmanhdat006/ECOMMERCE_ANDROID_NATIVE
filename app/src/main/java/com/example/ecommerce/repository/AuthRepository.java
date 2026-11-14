@@ -5,7 +5,9 @@ import com.example.ecommerce.service.ApiService;
 import com.example.ecommerce.service.RetrofitClient;
 import com.example.ecommerce.util.Constants;
 
-/** Đăng nhập, đăng ký và xác thực email. */
+/**
+ * Xử lý các tác vụ liên quan đến xác thực tài khoản và người dùng.
+ */
 public class AuthRepository extends BaseRepository {
 
     private static final String WRONG_LOGIN = "Email hoặc mật khẩu không đúng.";
@@ -22,7 +24,6 @@ public class AuthRepository extends BaseRepository {
             }
             return;
         }
-        // Với API đăng nhập, mã 401 nghĩa là sai email hoặc mật khẩu
         enqueue(api.login(new AuthModels.LoginRequest(email, password)), callback, WRONG_LOGIN);
     }
 

@@ -12,8 +12,7 @@ import com.example.ecommerce.util.Resource;
 import java.util.List;
 
 /**
- * Đọc đơn hàng: danh sách đơn, chi tiết một đơn, các sản phẩm chờ đánh giá.
- * Mỗi màn hình dùng một phần (mỗi màn có ViewModel riêng nên không lẫn dữ liệu).
+ * Quản lý dữ liệu lịch sử đơn hàng và sản phẩm chờ đánh giá.
  */
 public class OrderViewModel extends ViewModel {
 

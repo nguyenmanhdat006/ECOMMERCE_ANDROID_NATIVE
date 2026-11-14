@@ -11,10 +11,7 @@ import com.example.ecommerce.util.Resource;
 import com.example.ecommerce.util.SessionManager;
 
 /**
- * Xử lý đăng nhập, đăng ký, xác thực email.
- *
- * Mỗi thao tác có một LiveData kết quả. Sau khi màn hình xử lý xong kết quả (ví dụ chuyển trang),
- * hãy gọi clear...() để kết quả cũ không bị xử lý lại khi quay về màn hình này.
+ * Quản lý logic và trạng thái các luồng Đăng nhập, Đăng ký và Xác thực tài khoản.
  */
 public class AuthViewModel extends ViewModel {
 
@@ -35,7 +32,6 @@ public class AuthViewModel extends ViewModel {
         repository.login(email, password, new RepositoryCallback<AuthModels.LoginResponse>() {
             @Override
             public void onSuccess(AuthModels.LoginResponse data) {
-                // Lưu token để các lần gọi API sau tự gắn vào header
                 SessionManager.saveLogin(data.token, data.user);
                 loginResult.setValue(Resource.success(data));
             }

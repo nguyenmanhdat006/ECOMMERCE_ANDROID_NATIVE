@@ -1,14 +1,16 @@
 package com.example.ecommerce.model;
 
-/** Một dòng trong giỏ hàng (GET /api/carts/user/{userId}). */
+/**
+ * Đại diện cho một mục sản phẩm có trong giỏ hàng.
+ */
 public class CartItem {
     public String id;
-    public Product product;              // thông tin sản phẩm (tên, giá, ảnh)
-    public ProductVariant productVariant; // biến thể đã chọn (size, màu, tồn kho)
+    public Product product;              // Thông tin chung của sản phẩm
+    public ProductVariant productVariant; // Phân loại chọn mua (màu sắc, kích cỡ)
     public int quantity;
     public String userId;
 
-    /** Chữ mô tả biến thể, ví dụ "M, Trắng". */
+    /** Trả về chuỗi tổng hợp thông tin kích cỡ và màu sắc. */
     public String getVariantText() {
         if (productVariant == null) {
             return "";
@@ -16,26 +18,27 @@ public class CartItem {
         return productVariant.getSize() + ", " + productVariant.getColor();
     }
 
-    /** Nhãn theo thiết kế giỏ hàng: màu trước, size sau, ví dụ "Trắng, M". */
+    /** Trả về nhãn phân loại hiển thị trên thẻ giỏ hàng (Màu trước, Size sau). */
     public String getVariantLabel() {
         if (productVariant == null) {
             return "";
         }
-        String color = productVariant.getColor();
-        String size = productVariant.getSize();
-        boolean hasColor = color != null && !color.isEmpty();
-        boolean hasSize = size != null && !size.isEmpty();
-        if (hasColor && hasSize) {
-            return color + ", " + size;
+        String cVal = productVariant.getColor();
+        String sVal = productVariant.getSize();
+        boolean isColorPresent = cVal != null && !cVal.isEmpty();
+        boolean isSizePresent = sVal != null && !sVal.isEmpty();
+        if (isColorPresent && isSizePresent) {
+            return cVal + ", " + sVal;
         }
-        return hasColor ? color : (hasSize ? size : "");
+        return isColorPresent ? cVal : (isSizePresent ? sVal : "");
     }
 
+    /** Thành tiền cho sản phẩm trong giỏ = đơn giá * số lượng. */
     public double getLineTotal() {
         return product.getPrice() * quantity;
     }
 
-    /** Dữ liệu gửi lên khi thêm hoặc sửa số lượng dòng giỏ hàng. */
+    /** Đơn vị dữ liệu yêu cầu khi thay đổi mục giỏ hàng. */
     public static class Request {
         public String productVariantId;
         public int quantity;

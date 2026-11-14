@@ -85,7 +85,7 @@
                 android:orientation="vertical"
                 android:padding="12dp" />
 
-            <!-- 3. Phương thức thanh toán: chỉ có COD -->
+            <!-- 3. Phương thức thanh toán -->
             <TextView
                 style="@style/TextAppearance.App.Heading"
                 android:layout_width="wrap_content"
@@ -93,14 +93,97 @@
                 android:layout_marginTop="20dp"
                 android:text="Phương thức thanh toán" />
 
-            <TextView
-                style="@style/TextAppearance.App.Body"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:text="Thanh toán khi nhận hàng (COD)" />
+                android:orientation="vertical"
+                android:padding="4dp">
+
+                <!-- 1. COD -->
+                <LinearLayout
+                    android:id="@+id/payment_cod_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="10dp">
+
+                    <RadioButton
+                        android:id="@+id/payment_cod_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/bg_badge_cod"
+                        android:paddingHorizontal="7dp"
+                        android:paddingVertical="3dp"
+                        android:text="COD"
+                        android:textColor="@color/white"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/payment_cod" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/stroke" />
+
+                <!-- 2. VNPay -->
+                <LinearLayout
+                    android:id="@+id/payment_vnpay_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="10dp">
+
+                    <RadioButton
+                        android:id="@+id/payment_vnpay_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:clickable="false"
+                        android:focusable="false" />
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="4dp"
+                        android:contentDescription="@string/payment_vnpay"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_vnpay" />
+
+                    <TextView
+                        style="@style/TextAppearance.App.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/payment_vnpay" />
+                </LinearLayout>
+            </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.App.TextInput"

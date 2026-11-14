@@ -100,4 +100,8 @@
     <string name="location_failed">Không lấy được vị trí. Hãy thử lại ở nơi có sóng tốt hơn.</string>
     <string name="location_no_address">Không xác định được địa chỉ từ vị trí này. Hãy nhập tay.</string>
     <string name="location_filled">Đã điền địa chỉ từ vị trí của bạn. Hãy kiểm tra lại trước khi lưu.</string>
+
+    <string name="payment_cod">Thanh toán khi nhận hàng</string>
+    <string name="payment_vnpay">Thanh toán qua ví VNPay</string>
+    <string name="payment_unsupported">Hiện tại chưa hỗ trợ phương thức thanh toán này, vui lòng chọn phương thức thanh toán khác.</string>
 </resources>

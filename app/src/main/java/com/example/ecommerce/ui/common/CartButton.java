@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import com.example.ecommerce.R;
 
 /**
- * C3 (một phần) - Nút giỏ hàng có chấm số lượng. Số lượng bằng 0 thì ẩn chấm.
+ * Nút biểu tượng giỏ hàng tích hợp huy hiệu hiển thị số lượng sản phẩm.
  */
 public class CartButton extends FrameLayout {
 
@@ -29,12 +29,12 @@ public class CartButton extends FrameLayout {
         icon = findViewById(R.id.cart_icon);
     }
 
-    public void setCount(int count) {
-        if (count <= 0) {
+    public void setCount(int badgeCount) {
+        if (badgeCount <= 0) {
             badge.setVisibility(GONE);
             return;
         }
-        badge.setText(count > 99 ? "99+" : String.valueOf(count));
+        badge.setText(badgeCount > 99 ? "99+" : String.valueOf(badgeCount));
         badge.setVisibility(VISIBLE);
     }
 

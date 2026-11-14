@@ -6,22 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Dữ liệu tạm giữa các màn hình trong luồng mua hàng (chỉ sống trong bộ nhớ):
- *   - danh sách sản phẩm sắp mua (từ giỏ hàng hoặc từ nút "Mua ngay")
- *   - địa chỉ giao hàng đang chọn
- * Màn hình Giỏ hàng / Chi tiết sản phẩm điền vào, màn hình Thanh toán đọc ra.
+ * Lưu trữ phiên làm việc tạm thời phục vụ luồng mua hàng và thanh toán.
  */
 public final class CheckoutSession {
 
-    /** Một dòng hàng sắp mua. */
+    /** Đại diện mục sản phẩm chuẩn bị tiến hành thanh toán. */
     public static class Item {
         public String variantId;
         public String productName;
         public String imageUrl;
-        public String variantText;   // ví dụ "M, Trắng"
+        public String variantText;
         public double price;
         public int quantity;
-        /** Id dòng trong giỏ hàng; null nếu mua ngay (không đi qua giỏ). */
         public String cartItemId;
     }
 
@@ -40,12 +36,13 @@ public final class CheckoutSession {
         return ITEMS;
     }
 
+    /** Tính tổng chi phí phiên thanh toán. */
     public static double getTotal() {
-        double total = 0;
-        for (Item item : ITEMS) {
-            total += item.price * item.quantity;
+        double sumTotal = 0;
+        for (Item sessionLine : ITEMS) {
+            sumTotal += sessionLine.price * sessionLine.quantity;
         }
-        return total;
+        return sumTotal;
     }
 
     public static Address getSelectedAddress() {
@@ -56,7 +53,7 @@ public final class CheckoutSession {
         selectedAddress = address;
     }
 
-    /** Xóa sạch sau khi đặt hàng xong hoặc khi đăng xuất. */
+    /** Reset trạng thái phiên thanh toán về ban đầu. */
     public static void clear() {
         ITEMS.clear();
         selectedAddress = null;

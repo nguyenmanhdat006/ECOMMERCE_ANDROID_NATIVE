@@ -8,17 +8,14 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.ecommerce.R;
 
 /**
- * Kiểm tra đăng nhập trước khi làm việc cần tài khoản (thêm giỏ hàng, mua hàng...).
- *
- * Cách dùng trong Fragment:
- *   if (!AuthGuard.requireLogin(this)) return;   // chưa đăng nhập thì tự mở màn Đăng nhập
+ * Kiểm soát quyền truy cập yêu cầu trạng thái đăng nhập tài khoản.
  */
 public final class AuthGuard {
 
     private AuthGuard() {
     }
 
-    /** Trả về true nếu đã đăng nhập. Nếu chưa: báo, mở màn Đăng nhập và trả về false. */
+    /** Kiểm tra xem phiên đăng nhập có hiệu lực hay không. Nếu chưa, chuyển tới màn Đăng nhập. */
     public static boolean requireLogin(Fragment fragment) {
         if (SessionManager.isLoggedIn()) {
             return true;

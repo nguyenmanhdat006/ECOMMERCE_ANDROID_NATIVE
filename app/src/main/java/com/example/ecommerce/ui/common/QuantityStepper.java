@@ -13,8 +13,7 @@ import androidx.annotation.Nullable;
 import com.example.ecommerce.R;
 
 /**
- * C9 - Bộ chỉnh số lượng "- 1 +". Giá trị luôn nằm trong [min, max]; mặc định min = 1, max = 99.
- * setQuantity()/setMax() không gọi listener; chỉ khi người dùng bấm nút mới gọi.
+ * Bộ điều khiển tăng giảm số lượng sản phẩm mua sắm (- 1 +).
  */
 public class QuantityStepper extends LinearLayout {
 
@@ -68,11 +67,11 @@ public class QuantityStepper extends LinearLayout {
     }
 
     private void change(int newValue) {
-        int clamped = Math.max(min, Math.min(newValue, max));
-        if (clamped == value) {
+        int clampedQty = Math.max(min, Math.min(newValue, max));
+        if (clampedQty == value) {
             return;
         }
-        value = clamped;
+        value = clampedQty;
         render();
         if (listener != null) {
             listener.onQuantityChanged(value);
