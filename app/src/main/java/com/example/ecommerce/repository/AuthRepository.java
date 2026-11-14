@@ -43,6 +43,24 @@ public class AuthRepository extends BaseRepository {
         enqueue(api.register(request), callback);
     }
 
+    public void resendVerification(
+            String email,
+            RepositoryCallback<AuthModels.ApiMessage> callback) {
+
+        if (Constants.USE_MOCK_DATA) {
+            AuthModels.ApiMessage message = new AuthModels.ApiMessage();
+            message.code = 200;
+            message.message = "Chế độ giả lập: dùng mã 123456.";
+            MockDataSource.success(callback, message);
+            return;
+        }
+
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("userName", email);
+
+        enqueue(api.resendVerification(body), callback);
+    }
+
     public void verify(String email, String code, RepositoryCallback<Void> callback) {
         if (Constants.USE_MOCK_DATA) {
             if (MockStore.verify(email, code)) {

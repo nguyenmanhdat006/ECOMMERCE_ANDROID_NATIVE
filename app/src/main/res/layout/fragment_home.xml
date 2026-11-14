@@ -32,7 +32,7 @@
                     android:importantForAccessibility="no"
                     android:padding="12dp"
                     android:src="@drawable/ic_person"
-                    android:tint="@color/primary"
+                    app:tint="@color/primary"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
 
                 <LinearLayout

@@ -5,4 +5,8 @@
         <attr name="subtitle" format="string" />
         <attr name="showBack" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="LoadingButton">
+        <attr name="android:text" />
+    </declare-styleable>
 </resources>

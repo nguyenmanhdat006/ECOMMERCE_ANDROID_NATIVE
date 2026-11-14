@@ -71,7 +71,7 @@
             android:layout_height="14dp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_star"
-            android:tint="@color/star" />
+            app:tint="@color/star" />
 
         <TextView
             android:id="@+id/product_rating"

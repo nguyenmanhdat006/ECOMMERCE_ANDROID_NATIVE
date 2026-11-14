@@ -98,6 +98,21 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
+<<<<<<< HEAD
+=======
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_star"
+                    app:tint="@color/star" />
+
+>>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
                 <TextView
                     android:id="@+id/product_name"
                     style="@style/TextAppearance.App.Title"

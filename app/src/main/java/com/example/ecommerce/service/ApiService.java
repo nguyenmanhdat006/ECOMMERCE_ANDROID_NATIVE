@@ -38,6 +38,9 @@ public interface ApiService {
     @POST("api/auth/verify")
     Call<Void> verify(@Body AuthModels.VerifyRequest body);
 
+    @POST("api/auth/resend-verification")
+    Call<AuthModels.ApiMessage> resendVerification(@Body java.util.Map<String, String> body);
+
     // ---------------------------------------------------------------- Sản phẩm, danh mục
 
     @GET("api/products/search")

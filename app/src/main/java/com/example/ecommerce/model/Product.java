@@ -46,7 +46,19 @@ public class Product {
         return productResources == null ? new ArrayList<>() : productResources;
     }
 
+<<<<<<< HEAD
     /** Tính tổng lượng hàng tồn kho cho tất cả phiên bản phân loại. */
+=======
+    /**
+     * Có thông tin biến thể (và tồn kho) hay không.
+     * API tìm kiếm không trả danh sách biến thể; chỉ API chi tiết sản phẩm mới có.
+     */
+    public boolean hasStockInfo() {
+        return variants != null;
+    }
+
+    /** Tổng tồn kho của mọi biến thể. */
+>>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
     public int getTotalStock() {
         int sumStock = 0;
         for (ProductVariant variantItem : getVariants()) {

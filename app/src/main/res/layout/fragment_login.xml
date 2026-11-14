@@ -33,7 +33,7 @@
                 android:importantForAccessibility="no"
                 android:padding="14dp"
                 android:src="@drawable/ic_cart"
-                android:tint="@color/primary" />
+                app:tint="@color/primary" />
 
             <TextView
                 style="@style/TextAppearance.App.Title"

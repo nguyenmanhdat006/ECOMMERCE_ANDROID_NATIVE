@@ -20,7 +20,7 @@ android {
 
         // true = dùng dữ liệu giả để dựng giao diện khi backend chưa chạy (xem repository/MockDataSource.java)
         // false = gọi backend thật. Đổi xong bấm Sync Project.
-        buildConfigField("boolean", "USE_MOCK_DATA", "false")
+        buildConfigField("boolean", "USE_MOCK_DATA", "true")
     }
 
     buildTypes {
