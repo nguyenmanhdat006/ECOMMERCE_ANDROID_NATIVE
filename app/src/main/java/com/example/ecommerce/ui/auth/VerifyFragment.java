@@ -15,80 +15,220 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.ecommerce.R;
 import com.example.ecommerce.databinding.FragmentVerifyBinding;
+import com.example.ecommerce.model.AuthModels;
 import com.example.ecommerce.util.Constants;
 import com.example.ecommerce.util.Resource;
 import com.example.ecommerce.viewmodel.AuthViewModel;
 
-/** Màn hình nhập mã 6 số gửi qua email để kích hoạt tài khoản. */
 public class VerifyFragment extends Fragment {
 
     private FragmentVerifyBinding binding;
     private AuthViewModel viewModel;
     private String email;
 
+    private boolean verifying = false;
+    private boolean resending = false;
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        binding = FragmentVerifyBinding.inflate(inflater, container, false);
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+
+        binding = FragmentVerifyBinding.inflate(
+                inflater, container, false
+        );
+
         return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-        email = requireArguments().getString(Constants.ARG_EMAIL);
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState) {
 
-        binding.verifyHint.setText("Nhập mã 6 số đã gửi tới\n" + email);
+        super.onViewCreated(view, savedInstanceState);
+
+        viewModel = new ViewModelProvider(this)
+                .get(AuthViewModel.class);
+
+        Bundle args = getArguments();
+        email = args == null
+                ? null
+                : args.getString(Constants.ARG_EMAIL);
+
+        if (email == null || email.trim().isEmpty()) {
+            binding.verifyHint.setText("Không tìm thấy email cần xác thực.");
+            binding.verifyButton.setEnabled(false);
+            binding.resendButton.setEnabled(false);
+            return;
+        }
+
+        email = email.trim();
+
+        binding.verifyHint.setText(
+                "Nhập mã 6 số trong email gửi tới\n" + email
+        );
+
         binding.verifyButton.setOnClickListener(v -> submit());
+
+        binding.resendButton.setOnClickListener(v -> {
+            if (!verifying && !resending) {
+                viewModel.resendVerification(email);
+            }
+        });
 
         if (Constants.USE_MOCK_DATA) {
             binding.mockHint.setVisibility(View.VISIBLE);
-            binding.mockHint.setText("Đang dùng dữ liệu giả. Mã xác thực: 123456");
+            binding.mockHint.setText(
+                    "Đang dùng dữ liệu giả. Mã xác thực: 123456"
+            );
         }
 
-        viewModel.getVerifyResult().observe(getViewLifecycleOwner(), this::render);
+        viewModel.getVerifyResult().observe(
+                getViewLifecycleOwner(),
+                this::renderVerify
+        );
+
+        viewModel.getResendResult().observe(
+                getViewLifecycleOwner(),
+                this::renderResend
+        );
     }
 
     private void submit() {
-        String code = binding.codeInput.getText().toString().trim();
-        if (code.length() != 6) {
-            binding.errorText.setText("Nhập đủ 6 số.");
-            binding.errorText.setVisibility(View.VISIBLE);
+        if (verifying || resending) {
             return;
         }
+
+        String code = binding.codeInput.getText()
+                .toString().trim();
+
+        if (!code.matches("[0-9]{6}")) {
+            showError("Nhập đúng mã gồm 6 chữ số.");
+            return;
+        }
+
         viewModel.verify(email, code);
     }
 
-    private void render(Resource<Void> result) {
-        if (result == null) {
+    private void renderVerify(Resource<Void> result) {
+        if (binding == null || result == null) {
             return;
         }
+
         switch (result.status) {
             case LOADING:
-                binding.verifyButton.setLoading(true);
+                verifying = true;
                 binding.errorText.setVisibility(View.GONE);
+                updateButtons();
                 break;
+
             case ERROR:
-                binding.verifyButton.setLoading(false);
-                binding.errorText.setText(result.message);
-                binding.errorText.setVisibility(View.VISIBLE);
+                verifying = false;
+                updateButtons();
+                showError(result.message);
                 viewModel.clearVerifyResult();
                 break;
+
             case SUCCESS:
-                binding.verifyButton.setLoading(false);
+                verifying = false;
+                updateButtons();
                 viewModel.clearVerifyResult();
-                Toast.makeText(requireContext(), "Đã kích hoạt tài khoản. Hãy đăng nhập.", Toast.LENGTH_LONG).show();
-                // Quay về màn Đăng nhập (bỏ qua màn Đăng ký và Xác thực khỏi lịch sử)
-                NavController navController = NavHostFragment.findNavController(this);
-                navController.popBackStack(R.id.loginFragment, false);
+
+                Toast.makeText(
+                        requireContext(),
+                        "Đã kích hoạt tài khoản. Hãy đăng nhập.",
+                        Toast.LENGTH_LONG
+                ).show();
+
+                NavController navController =
+                        NavHostFragment.findNavController(this);
+
+                if (!navController.popBackStack(
+                        R.id.loginFragment, false)) {
+                    navController.navigate(R.id.loginFragment);
+                }
                 break;
         }
+    }
+
+    private void renderResend(
+            Resource<AuthModels.ApiMessage> result) {
+
+        if (binding == null || result == null) {
+            return;
+        }
+
+        switch (result.status) {
+            case LOADING:
+                resending = true;
+                binding.errorText.setVisibility(View.GONE);
+                updateButtons();
+                break;
+
+            case ERROR:
+                resending = false;
+                updateButtons();
+                showError(result.message);
+                viewModel.clearResendResult();
+                break;
+
+            case SUCCESS:
+                resending = false;
+                updateButtons();
+                binding.errorText.setVisibility(View.GONE);
+
+                // Mã cũ không còn dùng được sau khi gửi lại mã.
+                binding.codeInput.setText("");
+
+                String message = "Đã gửi mã mới. Kiểm tra email và Spam.";
+
+                if (result.data != null
+                        && result.data.message != null
+                        && !result.data.message.trim().isEmpty()) {
+                    message = result.data.message;
+                }
+
+                Toast.makeText(
+                        requireContext(),
+                        message,
+                        Toast.LENGTH_LONG
+                ).show();
+
+                viewModel.clearResendResult();
+                break;
+        }
+    }
+
+    private void updateButtons() {
+        boolean busy = verifying || resending;
+
+        binding.verifyButton.setLoading(verifying);
+        binding.verifyButton.setEnabled(!busy);
+
+        binding.resendButton.setEnabled(!busy);
+        binding.resendButton.setText(
+                resending ? "Đang gửi..." : "Gửi lại mã"
+        );
+    }
+
+    private void showError(String message) {
+        binding.errorText.setText(
+                message == null || message.trim().isEmpty()
+                        ? "Đã có lỗi xảy ra. Vui lòng thử lại."
+                        : message
+        );
+
+        binding.errorText.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        verifying = false;
+        resending = false;
     }
 }

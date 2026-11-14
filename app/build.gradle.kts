@@ -20,7 +20,7 @@ android {
 
         // true = dÃ¹ng dá»¯ liá»‡u giáº£ Ä‘á»ƒ dá»±ng giao diá»‡n khi backend chÆ°a cháº¡y (xem repository/MockDataSource.java)
         // false = gá»i backend tháº­t. Äá»•i xong báº¥m Sync Project.
-        buildConfigField("boolean", "USE_MOCK_DATA", "true")
+        buildConfigField("boolean", "USE_MOCK_DATA", "false")
     }
 
     buildTypes {
