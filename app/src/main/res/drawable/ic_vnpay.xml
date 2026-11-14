@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="24dp"
+    android:viewportWidth="255"
+    android:viewportHeight="80">
+
+    <!-- Left Wallet/Fingerprint Icon -->
+    <!-- Blue Card -->
+    <path
+        android:fillColor="#005BAA"
+        android:pathData="M24,12 C18,18 18,28 24,34 L44,54 C50,60 60,60 66,54 L54,42 C50,46 42,46 38,42 L26,30 C22,26 22,18 24,12 Z" />
+
+    <!-- Fingerprint Arcs -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M32,24 C38,18 48,18 54,24 M28,30 C36,22 52,22 60,30 M32,36 C38,30 48,30 54,36" />
+
+    <!-- Red Wallet Flap -->
+    <path
+        android:fillColor="#E51F27"
+        android:pathData="M28,40 C22,46 22,56 28,62 L42,76 C48,82 58,82 64,76 L84,56 C90,50 90,40 84,34 L70,20 C64,14 54,14 48,20 Z" />
+
+    <!-- Inner White Line Arc -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M36,48 C44,40 56,40 64,48" />
+
+    <!-- Red Text 'VN' -->
+    <!-- V -->
+    <path
+        android:fillColor="#E51F27"
+        android:pathData="M80,18 L92,18 L99,54 L106,18 L118,18 L105,62 L93,62 Z" />
+
+    <!-- N -->
+    <path
+        android:fillColor="#E51F27"
+        android:pathData="M120,18 L131,18 L142,48 L142,18 L152,18 L152,62 L141,62 L130,32 L130,62 L120,62 Z" />
+
+    <!-- Blue Text 'PAY' -->
+    <!-- P -->
+    <path
+        android:fillColor="#005BAA"
+        android:pathData="M156,18 L173,18 C182,18 188,23 188,31 C188,39 182,44 173,44 L167,44 L167,62 L156,62 Z M167,27 L167,35 L172,35 C176,35 178,33 178,31 C178,29 176,27 172,27 Z" />
+
+    <!-- A -->
+    <path
+        android:fillColor="#005BAA"
+        android:pathData="M192,18 L203,18 L214,62 L203,62 L201,52 L192,52 L190,62 L180,62 Z M194,43 L199,43 L197,31 Z" />
+
+    <!-- Y -->
+    <path
+        android:fillColor="#005BAA"
+        android:pathData="M215,18 L226,18 L232,36 L238,18 L249,18 L237,42 L237,62 L227,62 L227,42 Z" />
+
+</vector>

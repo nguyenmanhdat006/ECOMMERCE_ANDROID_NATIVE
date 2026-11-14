@@ -1,20 +1,23 @@
 package com.example.ecommerce.model;
 
-/** Địa chỉ giao hàng. Vừa dùng để nhận về, vừa dùng làm dữ liệu gửi lên khi thêm hoặc sửa. */
+/**
+ * Thực thể thông tin địa chỉ giao nhận hàng của người dùng.
+ */
 public class Address {
     public String id;
-    public String name;          // tên gợi nhớ, ví dụ "Nhà riêng" (không bắt buộc)
-    public String street;        // số nhà, đường
-    public String city;          // thành phố
-    public String state;         // tỉnh, quận
-    public String zipCode;       // mã bưu chính
-    public String phoneNumber;   // số điện thoại nhận hàng
+    public String name;          // Nhãn địa chỉ (VD: "Văn phòng", "Nhà riêng")
+    public String street;        // Số nhà, tên đường
+    public String city;          // Thành phố / Tỉnh
+    public String state;         // Quận / Huyện
+    public String zipCode;       // Mã bưu điện
+    public String phoneNumber;   // Số điện thoại liên hệ nhận hàng
 
-    /** Dòng địa chỉ đầy đủ: "12 Nguyễn Trãi, Quận 1, Hồ Chí Minh". */
+    /** Trả về chuỗi địa chỉ chi tiết định dạng đầy đủ. */
     public String getFullLine() {
         return street + ", " + state + ", " + city;
     }
 
+    /** Trả về tên hiển thị của địa chỉ, mặc định là 'Địa chỉ' nếu trống. */
     public String getDisplayName() {
         if (name == null || name.trim().isEmpty()) {
             return "Địa chỉ";
@@ -22,7 +25,7 @@ public class Address {
         return name;
     }
 
-    /** Chuỗi gửi vào trường shippingAddress của đơn hàng: "Nhà riêng - 0911222333 - 12 Nguyễn Trãi, ...". */
+    /** Chuỗi tổng hợp dùng để ghi nhận địa chỉ giao hàng trên đơn hàng. */
     public String toShippingText() {
         return getDisplayName() + " - " + phoneNumber + " - " + getFullLine();
     }

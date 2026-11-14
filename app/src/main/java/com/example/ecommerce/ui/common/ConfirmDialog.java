@@ -9,18 +9,14 @@ import com.example.ecommerce.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 /**
- * C14 - Hộp thoại xác nhận (xóa, hủy, đăng xuất...).
- *
- * ConfirmDialog.show(context, "Xóa sản phẩm?", "Sản phẩm sẽ bị xóa khỏi giỏ hàng.", "Xóa", true, () -> ...);
+ * Tiện ích hiển thị hộp thoại cảnh báo xác nhận hành động.
  */
 public final class ConfirmDialog {
 
     private ConfirmDialog() {
     }
 
-    /**
-     * @param danger true thì nút xác nhận hiện màu đỏ (hành động xóa, đăng xuất).
-     */
+    /** Hiển thị Dialog xác nhận thao tác người dùng. */
     public static void show(Context context, String title, String message, String confirmText,
                             boolean danger, Runnable onConfirm) {
         AlertDialog dialog = new MaterialAlertDialogBuilder(context)

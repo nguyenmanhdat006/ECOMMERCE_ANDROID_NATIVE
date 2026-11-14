@@ -12,16 +12,13 @@ import com.example.ecommerce.util.Resource;
 import java.util.List;
 
 /**
- * Giỏ hàng: tải danh sách, đổi số lượng, xóa dòng, thêm sản phẩm.
- * Dùng ở màn Giỏ hàng, Chi tiết sản phẩm (nút thêm giỏ) và Trang chủ (số trên biểu tượng giỏ).
+ * Quản lý trạng thái giỏ hàng cá nhân (hiển thị, thay đổi số lượng, xóa và thêm mới).
  */
 public class CartViewModel extends ViewModel {
 
     private final CartRepository repository = new CartRepository();
 
     private final MutableLiveData<Resource<List<CartItem>>> cart = new MutableLiveData<>();
-
-    /** Thông báo ngắn cho người dùng (thêm giỏ thành công, lỗi vượt tồn kho...). Hiển thị xong thì gọi clearMessage(). */
     private final MutableLiveData<String> message = new MutableLiveData<>();
 
     public LiveData<Resource<List<CartItem>>> getCart() { return cart; }
@@ -30,13 +27,13 @@ public class CartViewModel extends ViewModel {
 
     public void clearMessage() { message.setValue(null); }
 
-    /** Tải giỏ hàng và hiện trạng thái đang tải. */
+    /** Tải lại toàn bộ dữ liệu giỏ hàng. */
     public void load() {
         cart.setValue(Resource.<List<CartItem>>loading());
         fetchCart();
     }
 
-    /** Tải lại giỏ hàng nhưng không hiện vòng quay (dùng sau khi sửa số lượng, xóa). */
+    /** Cập nhật giỏ hàng không kèm hiệu ứng tải. */
     public void reloadQuietly() {
         fetchCart();
     }
@@ -49,9 +46,25 @@ public class CartViewModel extends ViewModel {
         repository.deleteItem(item.id, new ActionCallback(null));
     }
 
-    /** Thêm vào giỏ; thành công thì báo "Đã thêm vào giỏ hàng". */
+    /** Thêm sản phẩm vào giỏ kèm thông báo mặc định. */
     public void addToCart(String variantId, int quantity) {
         repository.addToCart(variantId, quantity, new ActionCallback("Đã thêm vào giỏ hàng"));
+    }
+
+    /** Thêm sản phẩm vào giỏ kèm xử lý phản hồi tùy chỉnh. */
+    public void addToCart(String variantId, int quantity, RepositoryCallback<Void> callback) {
+        repository.addToCart(variantId, quantity, new RepositoryCallback<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                reloadQuietly();
+                callback.onSuccess(data);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                callback.onError(errorMessage);
+            }
+        });
     }
 
     private void fetchCart() {
@@ -68,21 +81,18 @@ public class CartViewModel extends ViewModel {
         });
     }
 
-    /**
-     * Xử lý kết quả của một thao tác sửa giỏ hàng: báo cho người dùng rồi tải lại giỏ.
-     * successMessage = null thì không báo khi thành công.
-     */
+    /** Xử lý phản hồi kết quả và cập nhật trạng thái thông điệp. */
     private class ActionCallback implements RepositoryCallback<Void> {
-        private final String successMessage;
+        private final String msgSuccess;
 
-        ActionCallback(String successMessage) {
-            this.successMessage = successMessage;
+        ActionCallback(String msgSuccess) {
+            this.msgSuccess = msgSuccess;
         }
 
         @Override
         public void onSuccess(Void data) {
-            if (successMessage != null) {
-                message.setValue(successMessage);
+            if (msgSuccess != null) {
+                message.setValue(msgSuccess);
             }
             reloadQuietly();
         }

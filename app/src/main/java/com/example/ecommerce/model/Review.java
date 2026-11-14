@@ -1,18 +1,19 @@
 package com.example.ecommerce.model;
 
-/** Đánh giá của một người dùng về sản phẩm (GET /api/reviews/product/{id}). */
+/**
+ * Thông tin bài đánh giá sản phẩm của người mua.
+ */
 public class Review {
     public String id;
-    public int rating;        // 1 đến 5 sao
+    public int rating;        // Điểm đánh giá (1-5 sao)
     public String comment;
     public String createdAt;
     public String updatedAt;
     public Reviewer user;
 
-    /** Id dòng đơn đã đánh giá. Chỉ dùng cho dữ liệu giả (transient: không gửi, không nhận qua JSON). */
     public transient String orderItemId;
 
-    /** Người viết đánh giá (backend chỉ trả tên và ảnh đại diện). */
+    /** Thông tin người viết phản hồi đánh giá. */
     public static class Reviewer {
         public String id;
         public String firstName;
@@ -20,13 +21,13 @@ public class Review {
         public String avatar;
 
         public String getFullName() {
-            String last = (lastName == null) ? "" : lastName;
-            String first = (firstName == null) ? "" : firstName;
-            return (last + " " + first).trim();
+            String surname = (lastName == null) ? "" : lastName;
+            String givenName = (firstName == null) ? "" : firstName;
+            return (surname + " " + givenName).trim();
         }
     }
 
-    /** Dữ liệu gửi lên khi viết (cần productId, orderItemId) hoặc sửa (chỉ cần rating, comment) đánh giá. */
+    /** Đơn vị dữ liệu gửi yêu cầu tạo/sửa đánh giá. */
     public static class Request {
         public String productId;
         public String orderItemId;

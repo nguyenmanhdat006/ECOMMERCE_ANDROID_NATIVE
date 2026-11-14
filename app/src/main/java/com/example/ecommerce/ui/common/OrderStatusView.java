@@ -13,8 +13,7 @@ import androidx.core.content.ContextCompat;
 import com.example.ecommerce.R;
 
 /**
- * C13 - Nhãn trạng thái đơn hàng. Truyền mã trạng thái của backend:
- * PENDING, SHIPPING, WAIT_DELIVER, PAID, CANCELED, REFUND.
+ * Thành phần hiển thị nhãn trạng thái đơn hàng (Đang xử lý, Đã thanh toán, Đã hủy...).
  */
 public class OrderStatusView extends AppCompatTextView {
 
@@ -26,8 +25,8 @@ public class OrderStatusView extends AppCompatTextView {
         super(context, attrs);
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         setTypeface(getTypeface(), android.graphics.Typeface.BOLD);
-        float d = context.getResources().getDisplayMetrics().density;
-        setPadding((int) (10 * d), (int) (3 * d), (int) (10 * d), (int) (3 * d));
+        float density = context.getResources().getDisplayMetrics().density;
+        setPadding((int) (10 * density), (int) (3 * density), (int) (10 * density), (int) (3 * density));
     }
 
     public void setStatus(@Nullable String code) {

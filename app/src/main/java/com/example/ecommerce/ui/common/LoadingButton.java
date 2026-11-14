@@ -1,7 +1,6 @@
 package com.example.ecommerce.ui.common;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +12,7 @@ import com.example.ecommerce.R;
 import com.google.android.material.button.MaterialButton;
 
 /**
- * C6 - Nút chính có trạng thái đang xử lý: setLoading(true) hiện vòng quay và khóa nút
- * (dùng cho Đăng nhập, Đặt hàng, Lưu...).
+ * Nút bấm hành động tích hợp trạng thái chờ tiến trình (ProgressBar).
  */
 public class LoadingButton extends FrameLayout {
 
@@ -33,8 +31,7 @@ public class LoadingButton extends FrameLayout {
         button = findViewById(R.id.loading_button);
         progress = findViewById(R.id.loading_progress);
 
-        // Cho phép đặt chữ ngay trong XML bằng android:text
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoadingButton);
+        android.content.res.TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoadingButton);
         try {
             CharSequence t = a.getText(R.styleable.LoadingButton_android_text);
             if (t != null) {

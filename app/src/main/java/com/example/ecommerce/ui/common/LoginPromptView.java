@@ -13,8 +13,7 @@ import androidx.annotation.Nullable;
 import com.example.ecommerce.R;
 
 /**
- * Lời nhắc "Đăng nhập để tiếp tục" cho các màn hình cần tài khoản (Giỏ hàng, Đơn hàng, Tài khoản)
- * khi người dùng chưa đăng nhập. Gọi setOnLoginClickListener() để xử lý nút Đăng nhập.
+ * Giao diện gợi ý người dùng đăng nhập tài khoản để truy cập tính năng.
  */
 public class LoginPromptView extends LinearLayout {
 

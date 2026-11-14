@@ -19,20 +19,17 @@ import java.util.List;
 import retrofit2.Call;
 
 /**
- * Giữ trạng thái danh sách sản phẩm: bộ lọc (từ khóa, danh mục, sắp xếp...) và phân trang.
- * Dùng chung cho Trang chủ và màn Tìm kiếm. Fragment chỉ quan sát LiveData và gọi các hàm ở đây.
+ * Quản lý trạng thái phân trang, tìm kiếm và áp dụng bộ lọc cho danh sách sản phẩm.
  */
 public class ProductListViewModel extends ViewModel {
 
     private final ProductRepository repository = new ProductRepository();
 
-    // Dữ liệu cho giao diện quan sát
     private final MutableLiveData<Resource<List<Product>>> products = new MutableLiveData<>();
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>(new ArrayList<Category>());
     private final MutableLiveData<Boolean> loadingMore = new MutableLiveData<>(false);
 
-    // Trạng thái bên trong
-    private final List<Product> items = new ArrayList<>(); // các sản phẩm đã tải (gộp mọi trang)
+    private final List<Product> items = new ArrayList<>();
     private ProductFilter filter = new ProductFilter();
     private int page = 0;
     private boolean hasNext = false;
@@ -48,10 +45,7 @@ public class ProductListViewModel extends ViewModel {
 
     public ProductFilter getFilter() { return filter; }
 
-    /**
-     * Bắt đầu tải lần đầu với từ khóa và danh mục cho trước (có thể null).
-     * Chỉ chạy một lần; gọi lại khi xoay màn hình sẽ bị bỏ qua.
-     */
+    /** Khởi động phiên làm việc với các tham số ban đầu. */
     public void start(String keyword, String categoryId) {
         if (started) {
             return;
@@ -63,14 +57,14 @@ public class ProductListViewModel extends ViewModel {
         refresh();
     }
 
-    /** Tải lại từ trang đầu (kéo để làm mới, đổi bộ lọc, bấm Thử lại). */
+    /** Làm mới danh sách và quay về trang đầu tiên. */
     public void refresh() {
         if (currentCall != null) {
             currentCall.cancel();
         }
         List<Category> loadedCategories = categories.getValue();
         if (loadedCategories == null || loadedCategories.isEmpty()) {
-            loadCategories(); // lần tải trước có thể đã lỗi (mất mạng, backend chưa chạy)
+            loadCategories();
         }
         items.clear();
         hasNext = false;
@@ -79,7 +73,7 @@ public class ProductListViewModel extends ViewModel {
         fetch(0);
     }
 
-    /** Gọi khi cuộn tới cuối danh sách để tải trang kế tiếp. */
+    /** Tải tiếp trang dữ liệu kế tiếp khi cuộn danh sách. */
     public void loadMore() {
         if (loading || !hasNext) {
             return;
@@ -89,11 +83,11 @@ public class ProductListViewModel extends ViewModel {
     }
 
     public void setKeyword(String newKeyword) {
-        String value = (newKeyword == null || newKeyword.trim().isEmpty()) ? null : newKeyword.trim();
-        if (isSame(value, filter.keyword)) {
+        String trimmedKeyword = (newKeyword == null || newKeyword.trim().isEmpty()) ? null : newKeyword.trim();
+        if (isSame(trimmedKeyword, filter.keyword)) {
             return;
         }
-        filter.keyword = value;
+        filter.keyword = trimmedKeyword;
         refresh();
     }
 
@@ -111,7 +105,7 @@ public class ProductListViewModel extends ViewModel {
         refresh();
     }
 
-    /** Áp dụng các bộ lọc nâng cao (giá, thương hiệu, đánh giá, hàng mới) từ bảng Lọc. */
+    /** Cập nhật bộ lọc nâng cao. */
     public void applyAdvancedFilter(ProductFilter advanced) {
         filter.brand = advanced.brand;
         filter.minPrice = advanced.minPrice;
@@ -121,12 +115,11 @@ public class ProductListViewModel extends ViewModel {
         refresh();
     }
 
-    /** So sánh hai chuỗi có thể null. */
-    private boolean isSame(String a, String b) {
-        if (a == null) {
-            return b == null;
+    private boolean isSame(String firstStr, String secondStr) {
+        if (firstStr == null) {
+            return secondStr == null;
         }
-        return a.equals(b);
+        return firstStr.equals(secondStr);
     }
 
     private void loadCategories() {
@@ -138,19 +131,17 @@ public class ProductListViewModel extends ViewModel {
 
             @Override
             public void onError(String message) {
-                // Không có danh mục vẫn xem được sản phẩm; chip "Tất cả" luôn có.
             }
         });
     }
 
-    /** Tải một trang sản phẩm rồi nối vào danh sách đã có. */
-    private void fetch(final int pageToLoad) {
+    private void fetch(final int targetPage) {
         loading = true;
-        currentCall = repository.search(filter, pageToLoad, Constants.PAGE_SIZE,
+        currentCall = repository.search(filter, targetPage, Constants.PAGE_SIZE,
                 new RepositoryCallback<ProductPage>() {
                     @Override
                     public void onSuccess(ProductPage data) {
-                        page = pageToLoad;
+                        page = targetPage;
                         hasNext = data.hasNext();
                         items.addAll(data.getProducts());
                         loading = false;
@@ -165,7 +156,6 @@ public class ProductListViewModel extends ViewModel {
                         if (items.isEmpty()) {
                             products.setValue(Resource.<List<Product>>error(message));
                         }
-                        // Nếu đã có sản phẩm hiển thị thì giữ nguyên, lần cuộn sau sẽ thử tải lại
                     }
                 });
     }

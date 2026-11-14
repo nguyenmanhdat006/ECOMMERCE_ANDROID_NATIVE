@@ -13,10 +13,7 @@ import java.util.List;
 import retrofit2.Call;
 
 /**
- * Lấy dữ liệu sản phẩm và danh mục. ViewModel chỉ gọi repository, không cần biết dữ liệu đến từ đâu.
- *
- * Mỗi hàm trả về Call (yêu cầu mạng) để ViewModel có thể hủy khi có yêu cầu mới thay thế.
- * Khi dùng dữ liệu giả (Constants.USE_MOCK_DATA = true) thì không có Call nên trả về null.
+ * Xử lý truy vấn dữ liệu sản phẩm và phân loại danh mục.
  */
 public class ProductRepository extends BaseRepository {
 
@@ -28,12 +25,11 @@ public class ProductRepository extends BaseRepository {
             MockDataSource.search(filter, page, size, callback);
             return null;
         }
-        // isNewArrival chỉ gửi khi bật lọc "hàng mới" (null thì không gửi)
-        Boolean isNewArrival = filter.onlyNew ? Boolean.TRUE : null;
-        Call<ProductPage> call = api.searchProducts(filter.keyword, filter.categoryId, filter.brand,
-                filter.minPrice, filter.maxPrice, filter.minRating, isNewArrival,
+        Boolean flagNewArrival = filter.onlyNew ? Boolean.TRUE : null;
+        Call<ProductPage> apiCall = api.searchProducts(filter.keyword, filter.categoryId, filter.brand,
+                filter.minPrice, filter.maxPrice, filter.minRating, flagNewArrival,
                 filter.sortBy, filter.sortDirection, page, size);
-        return enqueue(call, callback);
+        return enqueue(apiCall, callback);
     }
 
     public Call<Product> getProduct(String id, RepositoryCallback<Product> callback) {
