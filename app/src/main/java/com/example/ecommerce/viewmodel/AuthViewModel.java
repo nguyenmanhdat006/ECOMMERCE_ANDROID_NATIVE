@@ -10,12 +10,9 @@ import com.example.ecommerce.repository.RepositoryCallback;
 import com.example.ecommerce.util.Resource;
 import com.example.ecommerce.util.SessionManager;
 
-<<<<<<< HEAD
 /**
  * Quản lý logic và trạng thái các luồng Đăng nhập, Đăng ký và Xác thực tài khoản.
  */
-=======
->>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
 public class AuthViewModel extends ViewModel {
 
     private final AuthRepository repository = new AuthRepository();
@@ -51,19 +48,9 @@ public class AuthViewModel extends ViewModel {
     }
 
     public void login(String email, String password) {
-<<<<<<< HEAD
-        loginResult.setValue(Resource.<AuthModels.LoginResponse>loading());
-        repository.login(email, password, new RepositoryCallback<AuthModels.LoginResponse>() {
-            @Override
-            public void onSuccess(AuthModels.LoginResponse data) {
-                SessionManager.saveLogin(data.token, data.user);
-                loginResult.setValue(Resource.success(data));
-            }
-=======
         loginResult.setValue(
                 Resource.<AuthModels.LoginResponse>loading()
         );
->>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
 
         repository.login(
                 email,

@@ -63,7 +63,7 @@
                         android:padding="10dp"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_share"
-                        android:tint="@color/text_secondary" />
+                        app:tint="@color/text_secondary" />
 
                     <ImageButton
                         android:id="@+id/favorite_button"
@@ -98,8 +98,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-<<<<<<< HEAD
-=======
                 <View
                     android:layout_width="0dp"
                     android:layout_height="1dp"
@@ -111,8 +109,6 @@
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_star"
                     app:tint="@color/star" />
-
->>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
                 <TextView
                     android:id="@+id/product_name"
                     style="@style/TextAppearance.App.Title"
@@ -148,7 +144,7 @@
                         android:layout_height="16dp"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_star"
-                        android:tint="@color/star" />
+                        app:tint="@color/star" />
 
                     <TextView
                         android:id="@+id/product_rating"
@@ -199,7 +195,7 @@
                     android:layout_height="24dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_chevron_right"
-                    android:tint="@color/text_hint" />
+                    app:tint="@color/text_hint" />
             </LinearLayout>
 
             <!-- 4. Mô tả: thu gọn 3 dòng, có "Xem thêm" -->
@@ -317,9 +313,9 @@
         android:padding="12dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back"
-        android:tint="@color/text_primary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_primary" />
 
     <com.example.ecommerce.ui.common.CartButton
         android:id="@+id/cart_button"

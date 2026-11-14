@@ -1,7 +1,6 @@
 package com.example.ecommerce.ui.common;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,13 +31,7 @@ public class LoadingButton extends FrameLayout {
         button = findViewById(R.id.loading_button);
         progress = findViewById(R.id.loading_progress);
 
-<<<<<<< HEAD
-        int[] attrsText = {android.R.attr.text};
-        android.content.res.TypedArray a = context.obtainStyledAttributes(attrs, attrsText);
-=======
-        // Cho phép đặt chữ ngay trong XML bằng android:text
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoadingButton);
->>>>>>> 20ba9a7cedd951ceef69aca31d50c2a189689380
+        android.content.res.TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.LoadingButton);
         try {
             CharSequence t = a.getText(R.styleable.LoadingButton_android_text);
             if (t != null) {
