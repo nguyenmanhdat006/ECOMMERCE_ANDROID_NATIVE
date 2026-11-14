@@ -11,7 +11,9 @@ import com.example.ecommerce.util.Resource;
 
 import java.util.List;
 
-/** Danh sách danh mục cho màn Danh mục. */
+/**
+ * Quản lý danh mục phân loại sản phẩm trên hệ thống.
+ */
 public class CategoryViewModel extends ViewModel {
 
     private final ProductRepository repository = new ProductRepository();

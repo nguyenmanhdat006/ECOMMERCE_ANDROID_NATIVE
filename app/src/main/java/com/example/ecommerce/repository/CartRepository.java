@@ -9,7 +9,9 @@ import com.example.ecommerce.util.SessionManager;
 
 import java.util.List;
 
-/** Giỏ hàng của người đang đăng nhập. */
+/**
+ * Xử lý dữ liệu giỏ hàng cá nhân.
+ */
 public class CartRepository extends BaseRepository {
 
     private final ApiService api = Constants.USE_MOCK_DATA ? null : RetrofitClient.getApiService();
@@ -23,7 +25,7 @@ public class CartRepository extends BaseRepository {
         enqueue(api.getCart(user.id), callback);
     }
 
-    /** Thêm vào giỏ; nếu biến thể đã có trong giỏ thì cộng dồn số lượng. */
+    /** Thêm sản phẩm vào giỏ hàng. */
     public void addToCart(String variantId, int quantity, RepositoryCallback<Void> callback) {
         if (Constants.USE_MOCK_DATA) {
             replyMock(MockStore.addToCart(variantId, quantity), callback);
@@ -32,7 +34,7 @@ public class CartRepository extends BaseRepository {
         enqueue(api.addToCart(new CartItem.Request(variantId, quantity)), callback);
     }
 
-    /** Đặt lại số lượng của một dòng giỏ hàng. */
+    /** Cập nhật số lượng của mục hàng trong giỏ. */
     public void updateQuantity(String cartItemId, String variantId, int quantity, RepositoryCallback<Void> callback) {
         if (Constants.USE_MOCK_DATA) {
             replyMock(MockStore.updateCartItem(cartItemId, quantity), callback);
@@ -50,12 +52,12 @@ public class CartRepository extends BaseRepository {
         enqueue(api.deleteCartItem(cartItemId), callback);
     }
 
-    /** error = null nghĩa là thành công. */
-    private void replyMock(String error, RepositoryCallback<Void> callback) {
-        if (error == null) {
+    /** Trả về phản hồi giả định trong chế độ Mock Data. */
+    private void replyMock(String mockErrMsg, RepositoryCallback<Void> callback) {
+        if (mockErrMsg == null) {
             MockDataSource.success(callback, null);
         } else {
-            MockDataSource.error(callback, error);
+            MockDataSource.error(callback, mockErrMsg);
         }
     }
 }

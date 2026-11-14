@@ -11,7 +11,9 @@ import com.example.ecommerce.util.Resource;
 
 import java.util.List;
 
-/** Danh sách địa chỉ, thêm, sửa, xóa. Dùng ở màn Danh sách địa chỉ, Biểu mẫu địa chỉ, Thanh toán. */
+/**
+ * Quản lý trạng thái và thao tác xem, thêm, chỉnh sửa, xóa địa chỉ giao hàng.
+ */
 public class AddressViewModel extends ViewModel {
 
     private final AddressRepository repository = new AddressRepository();
@@ -35,7 +37,7 @@ public class AddressViewModel extends ViewModel {
         fetch();
     }
 
-    /** Thêm mới (address.id = null) hoặc cập nhật. */
+    /** Lưu thông tin địa chỉ giao nhận (Thêm mới hoặc Cập nhật). */
     public void save(Address address) {
         saveResult.setValue(Resource.<Address>loading());
         repository.save(address, new RepositoryCallback<Address>() {

@@ -7,13 +7,7 @@ import com.example.ecommerce.model.User;
 import com.google.gson.Gson;
 
 /**
- * Lưu phiên đăng nhập (token và thông tin người dùng) vào bộ nhớ máy,
- * để lần sau mở app vẫn còn đăng nhập.
- *
- * Cách dùng ở bất kỳ đâu:
- *   SessionManager.isLoggedIn()   -> đã đăng nhập chưa
- *   SessionManager.getUser()      -> thông tin người dùng (null nếu chưa đăng nhập)
- *   SessionManager.logout()       -> đăng xuất
+ * Quản lý phiên làm việc và thông tin đăng nhập của người dùng.
  */
 public final class SessionManager {
 
@@ -27,12 +21,10 @@ public final class SessionManager {
     private SessionManager() {
     }
 
-    /** Gọi một lần trong EcommerceApp.onCreate(). */
     public static void init(Context context) {
         prefs = context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
-    /** Lưu thông tin sau khi đăng nhập thành công. */
     public static void saveLogin(String token, User user) {
         prefs.edit()
                 .putString(KEY_TOKEN, token)
@@ -49,11 +41,11 @@ public final class SessionManager {
     }
 
     public static User getUser() {
-        String json = prefs.getString(KEY_USER, null);
-        if (json == null) {
+        String userJson = prefs.getString(KEY_USER, null);
+        if (userJson == null) {
             return null;
         }
-        return GSON.fromJson(json, User.class);
+        return GSON.fromJson(userJson, User.class);
     }
 
     public static void logout() {

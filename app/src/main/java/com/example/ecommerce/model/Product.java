@@ -5,7 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Khớp với ProductDto của backend (GET /api/products/{id}, /api/products/search). */
+/**
+ * Thông tin chi tiết sản phẩm kinh doanh.
+ */
 public class Product {
     private String id;
     private String name;
@@ -45,69 +47,68 @@ public class Product {
     }
 
     /**
-     * Có thông tin biến thể (và tồn kho) hay không.
-     * API tìm kiếm không trả danh sách biến thể; chỉ API chi tiết sản phẩm mới có.
+     * Kiểm tra có thông tin các phiên bản phân loại hay không.
      */
     public boolean hasStockInfo() {
         return variants != null;
     }
 
-    /** Tổng tồn kho của mọi biến thể. */
+    /** Tính tổng lượng hàng tồn kho cho tất cả phiên bản phân loại. */
     public int getTotalStock() {
-        int total = 0;
-        for (ProductVariant v : getVariants()) {
-            total += v.getStockQuantity();
+        int sumStock = 0;
+        for (ProductVariant variantItem : getVariants()) {
+            sumStock += variantItem.getStockQuantity();
         }
-        return total;
+        return sumStock;
     }
 
-    /** Danh sách URL ảnh: ảnh chính đứng đầu; không có ảnh nào thì dùng thumbnail. */
+    /** Lấy danh sách toàn bộ liên kết hình ảnh minh họa sản phẩm. */
     public List<String> getImageUrls() {
-        List<String> urls = new ArrayList<>();
-        for (ProductResource r : getProductResources()) {
-            if (r.getUrl() != null && r.isPrimary()) {
-                urls.add(r.getUrl());
+        List<String> mediaList = new ArrayList<>();
+        for (ProductResource resItem : getProductResources()) {
+            if (resItem.getUrl() != null && resItem.isPrimary()) {
+                mediaList.add(resItem.getUrl());
             }
         }
-        for (ProductResource r : getProductResources()) {
-            if (r.getUrl() != null && !r.isPrimary()) {
-                urls.add(r.getUrl());
+        for (ProductResource resItem : getProductResources()) {
+            if (resItem.getUrl() != null && !resItem.isPrimary()) {
+                mediaList.add(resItem.getUrl());
             }
         }
-        if (urls.isEmpty() && thumbnail != null) {
-            urls.add(thumbnail);
+        if (mediaList.isEmpty() && thumbnail != null) {
+            mediaList.add(thumbnail);
         }
-        return urls;
+        return mediaList;
     }
 
-    /** Ảnh đại diện cho thẻ sản phẩm. */
+    /** Lấy ảnh đại diện chính của sản phẩm. */
     public String getCoverUrl() {
         if (thumbnail != null && !thumbnail.isEmpty()) {
             return thumbnail;
         }
-        List<String> urls = getImageUrls();
-        return urls.isEmpty() ? null : urls.get(0);
+        List<String> allImages = getImageUrls();
+        return allImages.isEmpty() ? null : allImages.get(0);
     }
 
-    /** Các size khác nhau (giữ thứ tự xuất hiện). */
+    /** Trích xuất danh sách tất cả các kích cỡ có sẵn. */
     public List<String> getSizes() {
-        Set<String> set = new LinkedHashSet<>();
-        for (ProductVariant v : getVariants()) {
-            if (v.getSize() != null) {
-                set.add(v.getSize());
+        Set<String> uniqueSizes = new LinkedHashSet<>();
+        for (ProductVariant itemVariant : getVariants()) {
+            if (itemVariant.getSize() != null) {
+                uniqueSizes.add(itemVariant.getSize());
             }
         }
-        return new ArrayList<>(set);
+        return new ArrayList<>(uniqueSizes);
     }
 
-    /** Các màu khác nhau (giữ thứ tự xuất hiện). */
+    /** Trích xuất danh sách tất cả các màu sắc có sẵn. */
     public List<String> getColors() {
-        Set<String> set = new LinkedHashSet<>();
-        for (ProductVariant v : getVariants()) {
-            if (v.getColor() != null) {
-                set.add(v.getColor());
+        Set<String> uniqueColors = new LinkedHashSet<>();
+        for (ProductVariant itemVariant : getVariants()) {
+            if (itemVariant.getColor() != null) {
+                uniqueColors.add(itemVariant.getColor());
             }
         }
-        return new ArrayList<>(set);
+        return new ArrayList<>(uniqueColors);
     }
 }

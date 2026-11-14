@@ -12,8 +12,7 @@ import androidx.annotation.Nullable;
 import com.example.ecommerce.R;
 
 /**
- * C11 - Thẻ địa chỉ: tên gợi nhớ, số điện thoại, địa chỉ đầy đủ, nhãn "Đang chọn".
- * Dùng cho Danh sách địa chỉ, Thanh toán, Chi tiết đơn.
+ * Thành phần thẻ hiển thị chi tiết thông tin địa chỉ giao nhận.
  */
 public class AddressCardView extends LinearLayout {
 
@@ -30,8 +29,8 @@ public class AddressCardView extends LinearLayout {
         super(context, attrs);
         setOrientation(VERTICAL);
         setBackgroundResource(R.drawable.bg_card);
-        int pad = (int) (14 * context.getResources().getDisplayMetrics().density);
-        setPadding(pad, pad, pad, pad);
+        int padPx = (int) (14 * context.getResources().getDisplayMetrics().density);
+        setPadding(padPx, padPx, padPx, padPx);
         LayoutInflater.from(context).inflate(R.layout.view_address_card, this, true);
         name = findViewById(R.id.address_name);
         phone = findViewById(R.id.address_phone);

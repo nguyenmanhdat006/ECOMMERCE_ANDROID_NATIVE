@@ -17,8 +17,7 @@ import com.example.ecommerce.util.Resource;
 import java.util.List;
 
 /**
- * Màn Thanh toán: chọn địa chỉ mặc định và đặt hàng (COD).
- * Đặt xong thì xóa các dòng đã mua khỏi giỏ hàng (nếu mua từ giỏ).
+ * Xử lý tiến trình đặt hàng và thanh toán (COD).
  */
 public class CheckoutViewModel extends ViewModel {
 
@@ -32,10 +31,10 @@ public class CheckoutViewModel extends ViewModel {
 
     public void clearOrderResult() { orderResult.setValue(null); }
 
-    /** Nếu chưa chọn địa chỉ nào thì lấy địa chỉ đầu tiên của người dùng làm mặc định. */
-    public void selectDefaultAddress(final Runnable onDone) {
+    /** Chọn địa chỉ nhận hàng ưu tiên cho phiên thanh toán. */
+    public void selectDefaultAddress(final Runnable finishCallback) {
         if (CheckoutSession.getSelectedAddress() != null) {
-            onDone.run();
+            finishCallback.run();
             return;
         }
         addressRepository.getAddresses(new RepositoryCallback<List<Address>>() {
@@ -44,17 +43,17 @@ public class CheckoutViewModel extends ViewModel {
                 if (!data.isEmpty()) {
                     CheckoutSession.setSelectedAddress(data.get(0));
                 }
-                onDone.run();
+                finishCallback.run();
             }
 
             @Override
             public void onError(String message) {
-                onDone.run();
+                finishCallback.run();
             }
         });
     }
 
-    /** Gửi đơn hàng lên máy chủ: chỉ thanh toán khi nhận hàng. */
+    /** Tạo đơn hàng thanh toán sau khi nhận hàng. */
     public void placeOrder(Address address, String notes) {
         Order.Request request = new Order.Request();
         request.shippingAddress = address.toShippingText();
@@ -79,11 +78,11 @@ public class CheckoutViewModel extends ViewModel {
         });
     }
 
-    /** Xóa khỏi giỏ hàng những dòng vừa đặt (bỏ qua kết quả, không ảnh hưởng đơn đã tạo). */
+    /** Xóa các sản phẩm đã đặt mua thành công khỏi giỏ hàng. */
     private void removePurchasedItemsFromCart() {
-        for (CheckoutSession.Item item : CheckoutSession.getItems()) {
-            if (item.cartItemId != null) {
-                cartRepository.deleteItem(item.cartItemId, new RepositoryCallback<Void>() {
+        for (CheckoutSession.Item sessionItem : CheckoutSession.getItems()) {
+            if (sessionItem.cartItemId != null) {
+                cartRepository.deleteItem(sessionItem.cartItemId, new RepositoryCallback<Void>() {
                     @Override
                     public void onSuccess(Void data) {
                     }

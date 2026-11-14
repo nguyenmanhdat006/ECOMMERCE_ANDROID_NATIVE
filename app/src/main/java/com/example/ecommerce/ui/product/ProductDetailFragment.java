@@ -1,49 +1,71 @@
 package com.example.ecommerce.ui.product;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.Layout;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.ecommerce.R;
 import com.example.ecommerce.databinding.FragmentProductDetailBinding;
+import com.example.ecommerce.model.CartItem;
 import com.example.ecommerce.model.Product;
+import com.example.ecommerce.model.Review;
+import com.example.ecommerce.ui.common.ReviewItemView;
 import com.example.ecommerce.util.AuthGuard;
 import com.example.ecommerce.util.CheckoutSession;
 import com.example.ecommerce.util.Constants;
 import com.example.ecommerce.util.FavoriteStore;
 import com.example.ecommerce.util.Formatters;
 import com.example.ecommerce.util.Resource;
+import com.example.ecommerce.util.SessionManager;
 import com.example.ecommerce.viewmodel.CartViewModel;
 import com.example.ecommerce.viewmodel.ProductDetailViewModel;
 import com.example.ecommerce.viewmodel.ProductDetailViewModel.Selection;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.example.ecommerce.viewmodel.ReviewViewModel;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Chi tiết sản phẩm: ảnh trượt, giá, chọn size và màu, số lượng, chi tiết, mô tả, thanh "Mua ngay".
+ * Chi tiết sản phẩm: ảnh trượt + header nổi (back, giỏ), giá/tên/thương hiệu/điểm, hàng "Phân loại",
+ * mô tả thu gọn, đánh giá nổi bật, thanh "Thêm vào giỏ" + "Mua ngay".
+ * Hàng Phân loại và cả hai nút ở đáy đều mở {@link VariantSheetFragment}.
  * Nhận id sản phẩm qua Bundle (khóa Constants.ARG_PRODUCT_ID).
  */
-public class ProductDetailFragment extends Fragment {
+public class ProductDetailFragment extends Fragment implements VariantSheetFragment.Listener {
+
+    private static final String TAG_SHEET = "variant_sheet";
+    /** Câu BaseRepository trả về khi API báo 404. */
+    private static final String NOT_FOUND = "Không tìm thấy dữ liệu.";
+    private static final int DESCRIPTION_LINES = 3;
+    private static final int PREVIEW_REVIEWS = 2;
 
     private FragmentProductDetailBinding binding;
     private ProductDetailViewModel viewModel;
     private CartViewModel cartViewModel;
+    private ReviewViewModel reviewViewModel;
     private final ImageSliderAdapter sliderAdapter = new ImageSliderAdapter();
     private Product product;
+    private String productId;
+    private List<Review> reviews = new ArrayList<>();
+    private boolean descriptionExpanded;
 
     @Nullable
     @Override
@@ -55,34 +77,63 @@ public class ProductDetailFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        productId = requireArguments().getString(Constants.ARG_PRODUCT_ID);
         viewModel = new ViewModelProvider(this).get(ProductDetailViewModel.class);
         cartViewModel = new ViewModelProvider(this).get(CartViewModel.class);
-        viewModel.load(requireArguments().getString(Constants.ARG_PRODUCT_ID));
+        reviewViewModel = new ViewModelProvider(this).get(ReviewViewModel.class);
+        viewModel.load(productId);
 
         binding.imagePager.setAdapter(sliderAdapter);
         new TabLayoutMediator(binding.imageDots, binding.imagePager, (tab, position) -> { }).attach();
 
-        binding.toolbar.setAction(1, R.drawable.ic_heart, getString(R.string.favorite), v -> toggleFavorite());
-        binding.toolbar.setAction(2, R.drawable.ic_share, getString(R.string.share_product), v -> shareProduct());
-
-        binding.bottomBar.setLabel(getString(R.string.subtotal));
-        binding.bottomBar.setPrimaryButton(getString(R.string.buy_now), v -> buyNow());
-        binding.bottomBar.setSecondaryIconButton(R.drawable.ic_cart, getString(R.string.add_to_cart), v -> addToCart());
-        binding.reviewsRow.setOnClickListener(v -> openReviews());
-
-        // Thông báo kết quả thêm giỏ hàng ("Đã thêm vào giỏ hàng" hoặc lỗi vượt tồn kho)
-        cartViewModel.getMessage().observe(getViewLifecycleOwner(), message -> {
-            if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                cartViewModel.clearMessage();
-            }
+        binding.backButton.setOnClickListener(v ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
+        binding.cartButton.setOnClickListener(v -> selectBottomTab(R.id.cartFragment));
+        binding.favoriteButton.setOnClickListener(v -> toggleFavorite());
+        binding.shareButton.setOnClickListener(v -> shareProduct());
+        binding.variantRow.setOnClickListener(v -> openVariantSheet(VariantSheetFragment.Mode.ADD));
+        binding.descriptionToggle.setOnClickListener(v -> {
+            descriptionExpanded = !descriptionExpanded;
+            applyDescriptionState();
         });
+        binding.reviewSeeAll.setOnClickListener(v -> openReviews());
 
-        binding.quantityStepper.setOnQuantityChangeListener(viewModel::setQuantity);
+        binding.bottomBar.setButtonsOnly(true);
+        binding.bottomBar.setSecondaryButton(getString(R.string.add_to_cart), R.drawable.ic_cart,
+                v -> openVariantSheet(VariantSheetFragment.Mode.ADD));
+        binding.bottomBar.setPrimaryButton(getString(R.string.buy_now),
+                v -> openVariantSheet(VariantSheetFragment.Mode.BUY));
 
         viewModel.getProduct().observe(getViewLifecycleOwner(), this::renderProduct);
         viewModel.getSelection().observe(getViewLifecycleOwner(), this::renderSelection);
+        reviewViewModel.getReviews().observe(getViewLifecycleOwner(), this::renderReviewResult);
+        cartViewModel.getCart().observe(getViewLifecycleOwner(), result -> {
+            if (result != null && result.status == Resource.Status.SUCCESS) {
+                List<CartItem> items = result.data;
+                binding.cartButton.setCount(items == null ? 0 : items.size());
+            }
+        });
     }
+
+    /** Mỗi lần quay lại màn hình: cập nhật đánh giá (có thể vừa viết) và số lượng trong giỏ. */
+    @Override
+    public void onResume() {
+        super.onResume();
+        reviewViewModel.load(productId);
+        if (SessionManager.isLoggedIn()) {
+            cartViewModel.reloadQuietly();
+        } else {
+            binding.cartButton.setCount(0);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    // ---------------------------------------------------------------- trạng thái (khối 7)
 
     private void renderProduct(Resource<Product> resource) {
         switch (resource.status) {
@@ -92,7 +143,11 @@ public class ProductDetailFragment extends Fragment {
                 break;
             case ERROR:
                 setContentVisible(false);
-                binding.stateView.showError(resource.message, v -> viewModel.reload());
+                if (NOT_FOUND.equals(resource.message)) {
+                    binding.stateView.showEmpty(getString(R.string.product_not_found));
+                } else {
+                    binding.stateView.showError(resource.message, v -> viewModel.reload());
+                }
                 break;
             case SUCCESS:
                 product = resource.data;
@@ -110,136 +165,191 @@ public class ProductDetailFragment extends Fragment {
         binding.bottomBar.setVisibility(v);
     }
 
-    /** Phần thông tin không đổi theo lựa chọn của người dùng. */
-    private void bindProduct(Product p) {
-        binding.toolbar.setTitle(p.getBrand() != null ? p.getBrand() : p.getName());
-        binding.toolbar.setSubtitle(p.getCategoryName());
-        updateFavoriteIcon();
+    // ---------------------------------------------------------------- khối 1, 2, 4
 
-        String tag = p.getCategoryName() != null ? p.getCategoryName() : p.getCategoryTypeName();
-        binding.categoryTag.setText(tag);
-        binding.categoryTag.setVisibility(tag == null ? View.INVISIBLE : View.VISIBLE);
-        binding.productRating.setText(Formatters.rating(p.getRating()));
-        binding.productName.setText(p.getName());
-        binding.productBrand.setText(p.getBrand());
-        binding.productBrand.setVisibility(p.getBrand() == null ? View.GONE : View.VISIBLE);
-        binding.productPrice.setText(Formatters.vnd(p.getPrice()));
+    private void bindProduct(Product p) {
+        updateFavoriteIcon();
 
         List<String> images = p.getImageUrls();
         sliderAdapter.submit(images);
         binding.imageDots.setVisibility(images.size() > 1 ? View.VISIBLE : View.INVISIBLE);
 
-        binding.detailsContainer.removeAllViews();
-        addDetailRow(getString(R.string.brand), p.getBrand());
-        addDetailRow(getString(R.string.category), p.getCategoryName());
-        addDetailRow(getString(R.string.category_type), p.getCategoryTypeName());
+        binding.productPrice.setText(Formatters.vnd(p.getPrice()));
+        binding.productName.setText(p.getName());
+        boolean hasBrand = p.getBrand() != null && !p.getBrand().isEmpty();
+        binding.productBrand.setText(hasBrand ? getString(R.string.brand_label, p.getBrand()) : "");
+        binding.productBrand.setVisibility(hasBrand ? View.VISIBLE : View.GONE);
+        binding.brandDot.setVisibility(hasBrand ? View.VISIBLE : View.GONE);
+        renderRating();
 
-        boolean hasDescription = p.getDescription() != null && !p.getDescription().trim().isEmpty();
-        binding.description.setText(p.getDescription());
-        binding.description.setVisibility(hasDescription ? View.VISIBLE : View.GONE);
-        binding.descriptionTitle.setVisibility(hasDescription ? View.VISIBLE : View.GONE);
+        String description = p.getDescription();
+        boolean hasDescription = description != null && !description.trim().isEmpty();
+        binding.descriptionCard.setVisibility(hasDescription ? View.VISIBLE : View.GONE);
+        if (hasDescription) {
+            binding.description.setText(description.trim());
+            applyDescriptionState();
+        }
     }
 
-    private void addDetailRow(String label, @Nullable String value) {
-        if (value == null || value.isEmpty()) {
+    /** "★ 4.6 (128 đánh giá)"; chưa có điểm lẫn đánh giá thì hiện "Chưa có đánh giá" (không có sao). */
+    private void renderRating() {
+        if (binding == null || product == null) {
             return;
         }
-        View row = getLayoutInflater().inflate(R.layout.item_detail_row, binding.detailsContainer, false);
-        ((TextView) row.findViewById(R.id.row_label)).setText(label);
-        ((TextView) row.findViewById(R.id.row_value)).setText(value);
-        binding.detailsContainer.addView(row);
+        int count = reviews.size();
+        Double rating = product.getRating();
+        boolean hasRating = rating != null && rating > 0;
+        if (!hasRating && count == 0) {
+            binding.ratingStar.setVisibility(View.GONE);
+            binding.productRating.setText(R.string.no_reviews);
+            binding.productRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_secondary));
+            binding.productRating.getPaint().setFakeBoldText(false);
+            return;
+        }
+        binding.ratingStar.setVisibility(View.VISIBLE);
+        binding.productRating.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary));
+        binding.productRating.getPaint().setFakeBoldText(true);
+        binding.productRating.setText(count > 0
+                ? getString(R.string.rating_with_count, Formatters.rating(rating), count)
+                : Formatters.rating(rating));
     }
 
-    /** Vẽ lại các phần phụ thuộc lựa chọn: chip size, chip màu, tồn kho, số lượng, tạm tính. */
+    /** Mô tả thu gọn 3 dòng; chỉ hiện "Xem thêm" khi nội dung thật sự bị cắt. */
+    private void applyDescriptionState() {
+        TextView text = binding.description;
+        text.setMaxLines(descriptionExpanded ? Integer.MAX_VALUE : DESCRIPTION_LINES);
+        text.setEllipsize(descriptionExpanded ? null : TextUtils.TruncateAt.END);
+        text.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                ViewTreeObserver observer = text.getViewTreeObserver();
+                if (observer.isAlive()) {
+                    observer.removeOnPreDrawListener(this);
+                }
+                if (binding != null) {
+                    Layout layout = text.getLayout();
+                    int lines = layout == null ? 0 : layout.getLineCount();
+                    boolean truncated = lines > 0 && layout.getEllipsisCount(lines - 1) > 0;
+                    binding.descriptionToggle.setVisibility(
+                            descriptionExpanded || truncated ? View.VISIBLE : View.GONE);
+                    binding.descriptionToggle.setText(descriptionExpanded ? R.string.see_less : R.string.see_more);
+                }
+                return true;
+            }
+        });
+    }
+
+    // ---------------------------------------------------------------- khối 3 và 6
+
     private void renderSelection(@Nullable Selection s) {
-        if (product == null || s == null) {
+        if (binding == null || product == null || s == null) {
             return;
         }
+        boolean soldOut = product.getVariants().isEmpty() || product.getTotalStock() <= 0;
+        boolean hasColors = !product.getColors().isEmpty();
+        boolean hasSizes = !product.getSizes().isEmpty();
 
-        List<String> sizes = product.getSizes();
-        binding.sizeSection.setVisibility(sizes.isEmpty() ? View.GONE : View.VISIBLE);
-        binding.sizeGroup.removeAllViews();
-        for (String size : sizes) {
-            boolean checked = size.equals(s.size);
-            addChip(binding.sizeGroup, size, checked,
-                    checked || viewModel.isSizeAvailable(product, size), () -> viewModel.selectSize(size));
+        String value;
+        int colorRes = R.color.text_secondary;
+        if (soldOut) {
+            value = getString(R.string.out_of_stock);
+            colorRes = R.color.text_hint;
+        } else if (s.color == null && s.size == null) {
+            value = defaultVariantText(hasColors, hasSizes);
+        } else {
+            // Đã chọn một phần hoặc đủ: "Trắng, M" hoặc "Trắng, Size"
+            List<String> parts = new ArrayList<>();
+            if (hasColors) {
+                parts.add(s.color != null ? s.color : getString(R.string.color));
+            }
+            if (hasSizes) {
+                parts.add(s.size != null ? s.size : getString(R.string.size));
+            }
+            value = TextUtils.join(", ", parts);
+            colorRes = R.color.primary;
         }
+        binding.variantValue.setText(value);
+        binding.variantValue.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
+        binding.variantRow.setEnabled(!soldOut);
 
-        List<String> colors = product.getColors();
-        binding.colorSection.setVisibility(colors.isEmpty() ? View.GONE : View.VISIBLE);
-        binding.colorGroup.removeAllViews();
-        for (String color : colors) {
-            boolean checked = color.equals(s.color);
-            addChip(binding.colorGroup, color, checked,
-                    checked || viewModel.isColorAvailable(product, color), () -> viewModel.selectColor(color));
-        }
-
-        int stock = s.variant != null ? s.variant.getStockQuantity() : product.getTotalStock();
-        binding.stockText.setText(stock > 0 ? getString(R.string.stock_left, stock) : getString(R.string.out_of_stock));
-
-        binding.quantityStepper.setMax(s.getMaxQuantity());
-        binding.quantityStepper.setQuantity(s.quantity);
-        binding.quantityStepper.setEnabled(s.variant != null && s.variant.getStockQuantity() > 0);
-
-        binding.bottomBar.setPrice(Formatters.vnd(product.getPrice() * s.quantity));
-        binding.bottomBar.setPrimaryEnabled(!(s.variant != null && s.variant.getStockQuantity() == 0));
+        binding.bottomBar.setPrimaryEnabled(!soldOut);
+        binding.bottomBar.setSecondaryEnabled(!soldOut);
     }
 
-    private void addChip(ChipGroup group, String text, boolean checked, boolean enabled, Runnable onClick) {
-        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.chip_choice, group, false);
-        chip.setText(text);
-        chip.setChecked(checked);
-        chip.setEnabled(enabled);
-        chip.setOnClickListener(v -> onClick.run());
-        group.addView(chip);
-    }
-
-    /** Lấy lựa chọn hiện tại; nếu chưa chọn đủ size và màu thì báo và trả về null. */
-    private Selection requireVariantSelected() {
-        Selection s = viewModel.getSelection().getValue();
-        if (s == null || s.variant == null) {
-            Toast.makeText(requireContext(), R.string.pick_variant, Toast.LENGTH_SHORT).show();
-            return null;
+    private String defaultVariantText(boolean hasColors, boolean hasSizes) {
+        if (hasColors && hasSizes) {
+            return getString(R.string.color) + ", " + getString(R.string.size);
         }
-        return s;
+        if (hasColors) {
+            return getString(R.string.color);
+        }
+        if (hasSizes) {
+            return getString(R.string.size);
+        }
+        return getString(R.string.variant_default);
     }
 
-    /** Nút giỏ hàng: thêm sản phẩm đã chọn vào giỏ (cần đăng nhập). */
-    private void addToCart() {
-        Selection s = requireVariantSelected();
-        if (s == null || !AuthGuard.requireLogin(this)) {
+    private void openVariantSheet(VariantSheetFragment.Mode mode) {
+        if (product == null || getChildFragmentManager().findFragmentByTag(TAG_SHEET) != null) {
             return;
         }
-        cartViewModel.addToCart(s.variant.getId(), s.quantity);
+        VariantSheetFragment.newInstance(mode).show(getChildFragmentManager(), TAG_SHEET);
     }
 
-    /** Nút Mua ngay: bỏ qua giỏ hàng, sang thẳng màn Thanh toán với sản phẩm đã chọn. */
-    private void buyNow() {
-        Selection s = requireVariantSelected();
-        if (s == null || !AuthGuard.requireLogin(this)) {
+    // ---------------------------------------------------------------- khối 5: đánh giá nổi bật
+
+    /** Chỉ cập nhật khi tải xong; đang tải hoặc lỗi thì giữ nguyên cái đang hiện. */
+    private void renderReviewResult(@Nullable Resource<List<Review>> result) {
+        if (result == null || result.status != Resource.Status.SUCCESS) {
             return;
         }
-        CheckoutSession.Item item = new CheckoutSession.Item();
-        item.variantId = s.variant.getId();
-        item.productName = product.getName();
-        item.imageUrl = product.getCoverUrl();
-        item.variantText = s.size + ", " + s.color;
-        item.price = product.getPrice();
-        item.quantity = s.quantity;
-        item.cartItemId = null; // không đi qua giỏ hàng
+        reviews = result.data == null ? new ArrayList<>() : result.data;
+        renderRating();
+        renderReviews();
+    }
 
-        List<CheckoutSession.Item> items = new ArrayList<>();
-        items.add(item);
-        CheckoutSession.setItems(items);
-        NavHostFragment.findNavController(this).navigate(R.id.checkoutFragment);
+    private void renderReviews() {
+        if (binding == null) {
+            return;
+        }
+        int count = reviews.size();
+        binding.reviewCard.setVisibility(count == 0 ? View.GONE : View.VISIBLE);
+        binding.reviewContainer.removeAllViews();
+        if (count == 0) {
+            return;
+        }
+        binding.reviewTitle.setText(getString(R.string.reviews_count, count));
+        float density = getResources().getDisplayMetrics().density;
+        for (int i = 0; i < Math.min(PREVIEW_REVIEWS, count); i++) {
+            if (i > 0) {
+                View divider = new View(requireContext());
+                divider.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.stroke));
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, (int) density);
+                params.topMargin = (int) (12 * density);
+                params.bottomMargin = (int) (12 * density);
+                binding.reviewContainer.addView(divider, params);
+            }
+            Review review = reviews.get(i);
+            ReviewItemView item = new ReviewItemView(requireContext());
+            item.bind(review.user == null ? "" : review.user.getFullName(),
+                    review.rating, review.comment, Formatters.date(review.createdAt));
+            binding.reviewContainer.addView(item, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
     }
 
     private void openReviews() {
+        if (product == null) {
+            return;
+        }
         Bundle args = new Bundle();
         args.putString(Constants.ARG_PRODUCT_ID, product.getId());
         args.putString(Constants.ARG_PRODUCT_NAME, product.getName());
         NavHostFragment.findNavController(this).navigate(R.id.reviewListFragment, args);
     }
+
+    // ---------------------------------------------------------------- yêu thích, chia sẻ
 
     private void toggleFavorite() {
         if (product == null) {
@@ -254,7 +364,9 @@ public class ProductDetailFragment extends Fragment {
             return;
         }
         boolean favorite = FavoriteStore.isFavorite(requireContext(), product.getId());
-        binding.toolbar.setActionIcon(1, favorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+        binding.favoriteButton.setImageResource(favorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+        ImageViewCompat.setImageTintList(binding.favoriteButton, ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), favorite ? R.color.danger : R.color.text_secondary)));
     }
 
     private void shareProduct() {
@@ -267,9 +379,52 @@ public class ProductDetailFragment extends Fragment {
         startActivity(Intent.createChooser(intent, getString(R.string.share_product)));
     }
 
+    // ---------------------------------------------------------------- VariantSheetFragment.Listener
+
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    public void onAddedToCart() {
+        if (binding == null) {
+            return;
+        }
+        Snackbar.make(binding.getRoot(), R.string.added_to_cart, Snackbar.LENGTH_SHORT)
+                .setAnchorView(binding.bottomBar)
+                .show();
+    }
+
+    /** "Mua ngay": bỏ qua giỏ hàng, sang thẳng Thanh toán với biến thể và số lượng đã chọn. */
+    @Override
+    public void onBuyNow() {
+        Selection s = viewModel.getSelection().getValue();
+        if (product == null || s == null || s.variant == null) {
+            return;
+        }
+        CheckoutSession.Item item = new CheckoutSession.Item();
+        item.variantId = s.variant.getId();
+        item.productName = product.getName();
+        item.imageUrl = product.getCoverUrl();
+        item.variantText = s.color + ", " + s.size; // cùng thứ tự "màu, size" như giỏ hàng
+        item.price = product.getPrice();
+        item.quantity = s.quantity;
+        item.cartItemId = null; // không đi qua giỏ hàng
+
+        List<CheckoutSession.Item> items = new ArrayList<>();
+        items.add(item);
+        CheckoutSession.setItems(items);
+        NavHostFragment.findNavController(this).navigate(R.id.checkoutFragment);
+    }
+
+    @Override
+    public void onLoginRequired() {
+        AuthGuard.requireLogin(this); // chưa đăng nhập: báo và mở màn Đăng nhập
+    }
+
+    private void selectBottomTab(int tabId) {
+        if (getActivity() != null) {
+            com.google.android.material.bottomnavigation.BottomNavigationView nav =
+                    getActivity().findViewById(R.id.bottom_nav);
+            if (nav != null) {
+                nav.setSelectedItemId(tabId);
+            }
+        }
     }
 }

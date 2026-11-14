@@ -10,6 +10,9 @@ import com.example.ecommerce.repository.RepositoryCallback;
 import com.example.ecommerce.util.Resource;
 import com.example.ecommerce.util.SessionManager;
 
+/**
+ * Quản lý logic và trạng thái các luồng Đăng nhập, Đăng ký và Xác thực tài khoản.
+ */
 public class AuthViewModel extends ViewModel {
 
     private final AuthRepository repository = new AuthRepository();

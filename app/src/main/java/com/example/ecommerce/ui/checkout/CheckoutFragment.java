@@ -52,6 +52,9 @@ public class CheckoutFragment extends Fragment {
         binding.changeAddress.setOnClickListener(v -> openAddressList());
         binding.addressEmpty.setOnClickListener(v -> openAddressList());
 
+        binding.paymentCodLayout.setOnClickListener(v -> selectPaymentMethod(true));
+        binding.paymentVnpayLayout.setOnClickListener(v -> selectPaymentMethod(false));
+
         binding.bottomBar.setLabel("Tổng thanh toán");
         binding.bottomBar.setPrimaryButton("Đặt hàng", v -> placeOrder());
 
@@ -121,7 +124,27 @@ public class CheckoutFragment extends Fragment {
         NavHostFragment.findNavController(this).navigate(R.id.addressListFragment, args);
     }
 
+    private void selectPaymentMethod(boolean isCod) {
+        binding.paymentCodRadio.setChecked(isCod);
+        binding.paymentVnpayRadio.setChecked(!isCod);
+        if (!isCod) {
+            showUnsupportedPaymentDialog();
+        }
+    }
+
+    private void showUnsupportedPaymentDialog() {
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Thông báo")
+                .setMessage(R.string.payment_unsupported)
+                .setPositiveButton("Đồng ý", null)
+                .show();
+    }
+
     private void placeOrder() {
+        if (binding.paymentVnpayRadio.isChecked()) {
+            showUnsupportedPaymentDialog();
+            return;
+        }
         Address address = CheckoutSession.getSelectedAddress();
         if (address == null) {
             Toast.makeText(requireContext(), "Hãy chọn địa chỉ giao hàng.", Toast.LENGTH_SHORT).show();

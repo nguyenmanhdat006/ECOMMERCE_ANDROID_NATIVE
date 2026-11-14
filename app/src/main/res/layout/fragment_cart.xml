@@ -5,33 +5,72 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Đây là tab chính nên không có nút quay lại -->
+    <!-- 1. Header "Giỏ hàng (N)": là tab chính nên không có nút quay lại -->
     <com.example.ecommerce.ui.common.AppToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/screen_padding"
         android:paddingVertical="12dp"
-        app:showBack="false"
-        app:title="Giỏ hàng" />
+        app:showBack="false" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/cart_list"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="4dp"
-            android:paddingBottom="16dp" />
+            android:layout_height="match_parent">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="16dp">
+
+                <!-- 2. Danh sách dòng giỏ (vuốt trái hoặc bấm thùng rác để xóa) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/cart_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+
+                <!-- 3. Tạm tính -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/screen_padding"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <TextView
+                        style="@style/TextAppearance.App.BodySecondary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/subtotal" />
+
+                    <TextView
+                        android:id="@+id/subtotal_value"
+                        style="@style/TextAppearance.App.Heading"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- 5. Trạng thái rỗng (có nút "Đi mua sắm"), đang tải, lỗi -->
         <com.example.ecommerce.ui.common.StateView
             android:id="@+id/state_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <!-- Chưa đăng nhập: mời đăng nhập thay cho danh sách -->
         <com.example.ecommerce.ui.common.LoginPromptView
             android:id="@+id/login_prompt"
             android:layout_width="match_parent"
@@ -39,6 +78,7 @@
             android:visibility="gone" />
     </FrameLayout>
 
+    <!-- 4. Thanh hành động dưới: Tổng cộng + Mua hàng (nằm trên thanh điều hướng) -->
     <com.example.ecommerce.ui.common.BottomActionBar
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"

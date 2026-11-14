@@ -1,6 +1,8 @@
 package com.example.ecommerce.model;
 
-/** Người dùng đăng nhập (UserDto của backend). Các trường để public cho dễ đọc. */
+/**
+ * Thông tin tài khoản người dùng hệ thống.
+ */
 public class User {
     public String id;
     public String firstName;
@@ -10,11 +12,11 @@ public class User {
     public String phoneNumber;
     public String role;
 
-    /** Tên đầy đủ kiểu Việt Nam: họ + tên. Nếu chưa có thì dùng email. */
+    /** Lấy tên hiển thị đầy đủ của tài khoản (Họ và Tên). */
     public String getFullName() {
-        String last = (lastName == null) ? "" : lastName;
-        String first = (firstName == null) ? "" : firstName;
-        String name = (last + " " + first).trim();
-        return name.isEmpty() ? email : name;
+        String uLastName = (lastName == null) ? "" : lastName;
+        String uFirstName = (firstName == null) ? "" : firstName;
+        String compositeName = (uLastName + " " + uFirstName).trim();
+        return compositeName.isEmpty() ? email : compositeName;
     }
 }

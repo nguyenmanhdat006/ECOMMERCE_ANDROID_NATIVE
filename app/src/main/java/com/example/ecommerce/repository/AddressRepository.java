@@ -7,7 +7,9 @@ import com.example.ecommerce.util.Constants;
 
 import java.util.List;
 
-/** Địa chỉ giao hàng của người đang đăng nhập. */
+/**
+ * Xử lý dữ liệu liên quan đến sổ địa chỉ của tài khoản.
+ */
 public class AddressRepository extends BaseRepository {
 
     private final ApiService api = Constants.USE_MOCK_DATA ? null : RetrofitClient.getApiService();
@@ -20,7 +22,7 @@ public class AddressRepository extends BaseRepository {
         enqueue(api.getMyAddresses(), callback);
     }
 
-    /** Địa chỉ chưa có id thì thêm mới, đã có id thì cập nhật. */
+    /** Lưu dữ liệu địa chỉ (tự động phân biệt tạo mới hoặc cập nhật). */
     public void save(Address address, RepositoryCallback<Address> callback) {
         if (Constants.USE_MOCK_DATA) {
             MockDataSource.success(callback, MockStore.saveAddress(address));

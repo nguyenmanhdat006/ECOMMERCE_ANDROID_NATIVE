@@ -11,7 +11,9 @@ import com.example.ecommerce.util.Resource;
 
 import java.util.List;
 
-/** Đánh giá sản phẩm: xem danh sách, viết mới, sửa, xóa. */
+/**
+ * Quản lý các tương tác gửi bài, chỉnh sửa, xóa bài đánh giá sản phẩm.
+ */
 public class ReviewViewModel extends ViewModel {
 
     private final ReviewRepository repository = new ReviewRepository();
@@ -38,10 +40,10 @@ public class ReviewViewModel extends ViewModel {
         fetch();
     }
 
-    /** Gửi đánh giá mới (reviewId = null) hoặc lưu sửa đổi (có reviewId). */
+    /** Tạo bài đánh giá mới hoặc cập nhật nội dung phản hồi cũ. */
     public void submit(String reviewId, Review.Request request) {
         submitResult.setValue(Resource.<Review>loading());
-        RepositoryCallback<Review> callback = new RepositoryCallback<Review>() {
+        RepositoryCallback<Review> responseCb = new RepositoryCallback<Review>() {
             @Override
             public void onSuccess(Review data) {
                 submitResult.setValue(Resource.success(data));
@@ -53,9 +55,9 @@ public class ReviewViewModel extends ViewModel {
             }
         };
         if (reviewId == null) {
-            repository.createReview(request, callback);
+            repository.createReview(request, responseCb);
         } else {
-            repository.updateReview(reviewId, request, callback);
+            repository.updateReview(reviewId, request, responseCb);
         }
     }
 

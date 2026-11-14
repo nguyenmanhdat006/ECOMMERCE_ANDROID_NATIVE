@@ -20,6 +20,7 @@ import com.google.android.material.button.MaterialButton;
  */
 public class BottomActionBar extends LinearLayout {
 
+    private final View info;
     private final TextView label;
     private final TextView price;
     private final TextView primary;
@@ -38,6 +39,7 @@ public class BottomActionBar extends LinearLayout {
         setPadding((int) (20 * d), (int) (14 * d), (int) (20 * d), (int) (14 * d));
         setElevation(8 * d);
         LayoutInflater.from(context).inflate(R.layout.view_bottom_action_bar, this, true);
+        info = findViewById(R.id.bar_info);
         label = findViewById(R.id.bar_label);
         price = findViewById(R.id.bar_price);
         primary = findViewById(R.id.bar_primary);
@@ -84,5 +86,34 @@ public class BottomActionBar extends LinearLayout {
         secondary.setContentDescription(description);
         secondary.setOnClickListener(listener);
         secondary.setVisibility(View.VISIBLE);
+    }
+
+    /** Nút phụ có cả biểu tượng lẫn chữ (ví dụ giỏ hàng + "Thêm vào giỏ"). */
+    public void setSecondaryButton(CharSequence text, @DrawableRes int icon, @Nullable OnClickListener listener) {
+        secondary.setText(text);
+        secondary.setIconResource(icon);
+        secondary.setIconPadding((int) (8 * getResources().getDisplayMetrics().density));
+        secondary.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        secondary.setOnClickListener(listener);
+        secondary.setVisibility(View.VISIBLE);
+    }
+
+    public void setSecondaryEnabled(boolean enabled) {
+        secondary.setEnabled(enabled);
+        secondary.setAlpha(enabled ? 1f : 0.5f);
+    }
+
+    /**
+     * true: ẩn nhãn + giá bên trái, hai nút chia đều chiều ngang (Chi tiết sản phẩm).
+     * false: bố cục mặc định (nhãn + giá bên trái, nút bên phải).
+     */
+    public void setButtonsOnly(boolean buttonsOnly) {
+        info.setVisibility(buttonsOnly ? View.GONE : View.VISIBLE);
+        for (View button : new View[]{secondary, primary}) {
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) button.getLayoutParams();
+            params.width = buttonsOnly ? 0 : LayoutParams.WRAP_CONTENT;
+            params.weight = buttonsOnly ? 1f : 0f;
+            button.setLayoutParams(params);
+        }
     }
 }

@@ -14,11 +14,11 @@ import com.example.ecommerce.util.Resource;
 import retrofit2.Call;
 
 /**
- * Trạng thái màn hình chi tiết sản phẩm: dữ liệu sản phẩm và lựa chọn size, màu, số lượng.
+ * Quản lý thông tin chi tiết sản phẩm và các thuộc tính mua sắm (Màu, Size, Số lượng).
  */
 public class ProductDetailViewModel extends ViewModel {
 
-    /** Lựa chọn hiện tại của người dùng. variant = null khi chưa chọn đủ size và màu. */
+    /** Đơn vị trạng thái lựa chọn của người mua. */
     public static class Selection {
         @Nullable public final String size;
         @Nullable public final String color;
@@ -48,7 +48,7 @@ public class ProductDetailViewModel extends ViewModel {
 
     public LiveData<Selection> getSelection() { return selection; }
 
-    /** Tải sản phẩm; gọi lại cùng id khi đã tải xong thì bỏ qua. */
+    /** Tải thông tin chi tiết của sản phẩm theo mã định danh. */
     public void load(String productId) {
         Resource<Product> current = product.getValue();
         if (productId.equals(loadedId) && current != null && current.status == Resource.Status.SUCCESS) {
@@ -79,64 +79,65 @@ public class ProductDetailViewModel extends ViewModel {
         });
     }
 
-    /** Bấm lần nữa vào size đang chọn thì bỏ chọn. */
+    /** Xử lý việc chọn hoặc bỏ chọn kích thước sản phẩm. */
     public void selectSize(String size) {
-        Product p = currentProduct();
-        Selection s = selection.getValue();
-        if (p == null || s == null) {
+        Product targetProduct = currentProduct();
+        Selection currSelection = selection.getValue();
+        if (targetProduct == null || currSelection == null) {
             return;
         }
-        String newSize = size.equals(s.size) ? null : size;
-        String color = s.color;
-        if (newSize != null && color != null && findVariant(p, newSize, color) == null) {
+        String updatedSize = size.equals(currSelection.size) ? null : size;
+        String color = currSelection.color;
+        if (updatedSize != null && color != null && findVariant(targetProduct, updatedSize, color) == null) {
             color = null;
         }
-        selection.setValue(build(p, newSize, color, 1));
+        selection.setValue(build(targetProduct, updatedSize, color, 1));
     }
 
+    /** Xử lý việc chọn hoặc bỏ chọn màu sắc sản phẩm. */
     public void selectColor(String color) {
-        Product p = currentProduct();
-        Selection s = selection.getValue();
-        if (p == null || s == null) {
+        Product targetProduct = currentProduct();
+        Selection currSelection = selection.getValue();
+        if (targetProduct == null || currSelection == null) {
             return;
         }
-        String newColor = color.equals(s.color) ? null : color;
-        String size = s.size;
-        if (newColor != null && size != null && findVariant(p, size, newColor) == null) {
+        String updatedColor = color.equals(currSelection.color) ? null : color;
+        String size = currSelection.size;
+        if (updatedColor != null && size != null && findVariant(targetProduct, size, updatedColor) == null) {
             size = null;
         }
-        selection.setValue(build(p, size, newColor, 1));
+        selection.setValue(build(targetProduct, size, updatedColor, 1));
     }
 
     public void setQuantity(int quantity) {
-        Selection s = selection.getValue();
-        if (s == null) {
+        Selection currSelection = selection.getValue();
+        if (currSelection == null) {
             return;
         }
-        int clamped = Math.max(1, Math.min(quantity, s.getMaxQuantity()));
-        selection.setValue(new Selection(s.size, s.color, clamped, s.variant));
+        int validQty = Math.max(1, Math.min(quantity, currSelection.getMaxQuantity()));
+        selection.setValue(new Selection(currSelection.size, currSelection.color, validQty, currSelection.variant));
     }
 
-    /** Size còn hàng (theo màu đang chọn, nếu có). */
-    public boolean isSizeAvailable(Product p, String size) {
-        Selection s = selection.getValue();
-        String color = s == null ? null : s.color;
-        for (ProductVariant v : p.getVariants()) {
-            if (size.equals(v.getSize()) && v.getStockQuantity() > 0
-                    && (color == null || color.equals(v.getColor()))) {
+    /** Kiểm tra xem kích cỡ còn sẵn hàng hay không. */
+    public boolean isSizeAvailable(Product prod, String sizeVal) {
+        Selection currSel = selection.getValue();
+        String colorVal = currSel == null ? null : currSel.color;
+        for (ProductVariant v : prod.getVariants()) {
+            if (sizeVal.equals(v.getSize()) && v.getStockQuantity() > 0
+                    && (colorVal == null || colorVal.equals(v.getColor()))) {
                 return true;
             }
         }
         return false;
     }
 
-    /** Màu còn hàng (theo size đang chọn, nếu có). */
-    public boolean isColorAvailable(Product p, String color) {
-        Selection s = selection.getValue();
-        String size = s == null ? null : s.size;
-        for (ProductVariant v : p.getVariants()) {
-            if (color.equals(v.getColor()) && v.getStockQuantity() > 0
-                    && (size == null || size.equals(v.getSize()))) {
+    /** Kiểm tra xem màu sắc còn sẵn hàng hay không. */
+    public boolean isColorAvailable(Product prod, String colorVal) {
+        Selection currSel = selection.getValue();
+        String sizeVal = currSel == null ? null : currSel.size;
+        for (ProductVariant v : prod.getVariants()) {
+            if (colorVal.equals(v.getColor()) && v.getStockQuantity() > 0
+                    && (sizeVal == null || sizeVal.equals(v.getSize()))) {
                 return true;
             }
         }
@@ -145,20 +146,20 @@ public class ProductDetailViewModel extends ViewModel {
 
     @Nullable
     private Product currentProduct() {
-        Resource<Product> r = product.getValue();
-        return r == null ? null : r.data;
+        Resource<Product> res = product.getValue();
+        return res == null ? null : res.data;
     }
 
-    private Selection build(Product p, @Nullable String size, @Nullable String color, int quantity) {
-        ProductVariant variant = (size != null && color != null) ? findVariant(p, size, color) : null;
+    private Selection build(Product prod, @Nullable String size, @Nullable String color, int quantity) {
+        ProductVariant variant = (size != null && color != null) ? findVariant(prod, size, color) : null;
         return new Selection(size, color, quantity, variant);
     }
 
     @Nullable
-    private ProductVariant findVariant(Product p, String size, String color) {
-        for (ProductVariant v : p.getVariants()) {
-            if (size.equals(v.getSize()) && color.equals(v.getColor())) {
-                return v;
+    private ProductVariant findVariant(Product prod, String size, String color) {
+        for (ProductVariant var : prod.getVariants()) {
+            if (size.equals(var.getSize()) && color.equals(var.getColor())) {
+                return var;
             }
         }
         return null;

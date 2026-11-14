@@ -2,24 +2,24 @@ package com.example.ecommerce.util;
 
 import android.net.Uri;
 
+/**
+ * Tiện ích xử lý địa chỉ đường dẫn hình ảnh từ backend.
+ */
 public final class ImageUrls {
 
     private ImageUrls() {
     }
 
-    /**
-     * Backend trả URL ảnh dạng http://localhost:8080/uploads/... ; emulator không truy cập được "localhost"
-     * của máy tính nên đổi sang host của BASE_URL (10.0.2.2).
-     */
+    /** Chuẩn hóa địa chỉ URL ảnh phục vụ hiển thị trên môi trường Emulator/Thiết bị. */
     public static String fix(String url) {
         if (url == null || url.isEmpty()) {
             return null;
         }
-        Uri uri = Uri.parse(url);
-        String host = uri.getHost();
-        if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
-            Uri base = Uri.parse(Constants.BASE_URL);
-            return uri.buildUpon().encodedAuthority(base.getAuthority()).build().toString();
+        Uri parsedUri = Uri.parse(url);
+        String hostStr = parsedUri.getHost();
+        if ("localhost".equals(hostStr) || "127.0.0.1".equals(hostStr)) {
+            Uri baseUri = Uri.parse(Constants.BASE_URL);
+            return parsedUri.buildUpon().encodedAuthority(baseUri.getAuthority()).build().toString();
         }
         return url;
     }

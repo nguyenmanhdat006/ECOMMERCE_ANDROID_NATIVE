@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Lưu danh sách sản phẩm yêu thích ngay trên máy (backend chưa có API yêu thích).
+ * Quản lý danh sách sản phẩm yêu thích được lưu cục bộ trên thiết bị.
  */
 public final class FavoriteStore {
 
@@ -25,14 +25,14 @@ public final class FavoriteStore {
         return prefs(context).getStringSet(KEY_IDS, new HashSet<>()).contains(productId);
     }
 
-    /** Đảo trạng thái yêu thích, trả về trạng thái mới. */
+    /** Chuyển đổi trạng thái lưu sản phẩm yêu thích. */
     public static boolean toggle(Context context, String productId) {
-        Set<String> ids = new HashSet<>(prefs(context).getStringSet(KEY_IDS, new HashSet<>()));
-        boolean nowFavorite = !ids.remove(productId);
-        if (nowFavorite) {
-            ids.add(productId);
+        Set<String> favSet = new HashSet<>(prefs(context).getStringSet(KEY_IDS, new HashSet<>()));
+        boolean isAddedFav = !favSet.remove(productId);
+        if (isAddedFav) {
+            favSet.add(productId);
         }
-        prefs(context).edit().putStringSet(KEY_IDS, ids).apply();
-        return nowFavorite;
+        prefs(context).edit().putStringSet(KEY_IDS, favSet).apply();
+        return isAddedFav;
     }
 }
